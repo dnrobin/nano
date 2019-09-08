@@ -1,4 +1,10 @@
+# mac...
+.DS_Store
+
+# composer
 composer.phar
+# composer.lock
 /vendor/
 
-# composer.lock
+# other
+/bin/
