@@ -22,10 +22,10 @@
   "require-dev": {},
   "autoload": {
     "psr-4": {
-      "nano\\": "src/"
+      "nano\\": "src/nano/"
     },
     "files": [
-      "src/utils.php"
+      "src/helpers.php"
     ]
   }
 }

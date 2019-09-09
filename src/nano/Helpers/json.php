@@ -1,4 +1,12 @@
 <?php
+/**
+ * nano - a lazy server api framework
+ * 
+ * @author    Daniel Robin <danrobin113@github.com>
+ * @version   1.4
+ * 
+ * last-update 09-2019
+ */
 
 class json implements ArrayAccess
 {
@@ -32,7 +40,7 @@ class json implements ArrayAccess
   /**
    * Get JSON string
    */
-  public function get()
+  public function string()
   {
     return json_encode($this->_data, JSON_PRETTY_PRINT);
   }
@@ -87,7 +95,7 @@ class json implements ArrayAccess
 
   function __toString()
   {
-    return $this->get();
+    return $this->string();
   }
 
   public static function fromFile($filename)

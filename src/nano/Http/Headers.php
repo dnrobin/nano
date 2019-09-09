@@ -1,11 +1,11 @@
 <?php
 /**
- * nano - lazy server app framework
- *
- * @author	  Daniel Robin <daniel.robin.1@ulaval.ca>
- * @version		1.4
- *
- * last updated: 09-2019
+ * nano - a lazy server api framework
+ * 
+ * @author    Daniel Robin <danrobin113@github.com>
+ * @version   1.4
+ * 
+ * last-update 09-2019
  */
 
 namespace nano\Http;
@@ -48,8 +48,6 @@ class Headers
 	public function set($name, $value)
 	{
 		$this->headers[$name] = $value;
-		// immediately set the header object
-		header("$name: $value\n\r", true);
 	}
 
 	/**
@@ -80,7 +78,6 @@ class Headers
 	public function remove($name)
 	{
 		if (array_key_exists($name, $this->headers)) {
-			header_remove("$name: {$this->headers[$name]}\n\r");
 			unset($this->headers[$name]);
 		}
 	}
