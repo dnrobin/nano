@@ -1,2 +1,2 @@
 # nano
-A lazy, tiny API framework written in PHP
+A tiny API framework written in PHP
