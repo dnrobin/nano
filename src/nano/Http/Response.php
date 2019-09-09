@@ -283,7 +283,7 @@ class Response
    * @param mixed
    * @return void
    */
-  public function setBody($body)
+  public function set($body)
   {
     $this->body = $body;
     @ob_clean(); // clear output buffer
@@ -301,7 +301,7 @@ class Response
   /**
    * @return mixed
    */
-  public function getBody()
+  public function get()
   {
     // precedence goes to output buffer
     if (ob_get_length() > 0)
@@ -417,7 +417,7 @@ class Response
     $this->setContentType("application/json");
     $this->setVersion('1.1');
     $this->setStatus($status);
-    $this->setBody($body);
+    $this->set($body);
   }
 
   /**

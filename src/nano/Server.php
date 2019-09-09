@@ -97,7 +97,16 @@ class Server
 
     if ($route->resolves(self::$request))
     {
-        // TODO
+      $this->response->setStatus(Http\Response::OK);
+
+      $result = (new Routing\RouteStrategy($route, self::$request, $this->response))->execute();
+
+      if ($result !== null)
+        $this->response->set($result);
+
+      $this->response->send();
+      
+      exit;
     }
   }
 
@@ -117,7 +126,7 @@ class Server
       $result = (new Routing\RouteStrategy($route, self::$request, $this->response))->execute();
 
       if ($result !== null)
-        $this->response->setBody($result);
+        $this->response->set($result);
     }
 
     $this->response->send();
