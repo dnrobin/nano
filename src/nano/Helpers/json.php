@@ -98,6 +98,11 @@ class json implements ArrayAccess
     return $this->string();
   }
 
+  function toArray()
+  {
+    return $this->_data;
+  }
+
   public static function fromFile($filename)
   {
     $j = new json();

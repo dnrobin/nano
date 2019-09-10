@@ -143,7 +143,7 @@ class Server
   public function __construct($config = [])
   {
     $default = [
-      'basedir' => './',
+      'basepath' => './',
       'app-env' => 'production',
       'content-type' => 'application/json'
     ];
@@ -163,6 +163,13 @@ class Server
     // prevent direct output in production mode
     $this->response->captureOutput();
 
-    $this->router = new Routing\Router;
+    $this->router = new Routing\Router();
+
+    // set new default path
+    set_include_path(realpath($config['basepath']));
+
+    // TODO: find a better way to construct responses based pipeline node events!
+    $_ENV['request'] = self::$request;
+    $_ENV['response'] = $this->response;
   }
 }

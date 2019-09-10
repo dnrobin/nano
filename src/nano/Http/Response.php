@@ -381,7 +381,7 @@ class Response
       switch ($this->contentType)
       {
         case "application/json":
-          $body = json_encode($body);
+          $body = json_encode($body, JSON_PRETTY_PRINT);
           break;
         
         case "application/xml":

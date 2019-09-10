@@ -37,6 +37,26 @@ if (!function_exists('error'))
 	}
 }
 
+if (!function_exists('view'))
+{
+	function view($whatever, $context = [], $basepath = './')
+	{
+		$basepath = get_include_path() . $basepath;
+		$filename = $basepath . $whatever;
+
+		if (is_object($context))
+			$context = object_to_array($context);
+
+		if (!file_exists($filename)) {
+			return new nano\View\View($whatever, $context, $basepath);
+		}
+
+		$content = file_get_contents($filename);
+		
+		return new nano\View\View($content, $context, $basepath);
+	}
+}
+
 if (!function_exists('object_to_array'))
 {
 	function object_to_array($object)
