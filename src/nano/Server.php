@@ -1,6 +1,6 @@
 <?php
 /**
- * nano - a lazy server api framework
+ * nano - a tiny server api framework
  * 
  * @author    Daniel Robin <danrobin113@github.com>
  * @version   1.4
