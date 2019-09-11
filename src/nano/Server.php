@@ -164,7 +164,7 @@ class Server
     $this->response->captureOutput();
 
     if (!$router)
-      $router = new Routint\Router();
+      $router = new Routing\Router();
 
     $this->router = $router;
 
