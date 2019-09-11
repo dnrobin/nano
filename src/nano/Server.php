@@ -143,7 +143,7 @@ class Server
   public function __construct($config = [])
   {
     $default = [
-      'basepath' => './',
+      'basepath' => '/',
       'app-env' => 'production',
       'content-type' => 'application/json'
     ];

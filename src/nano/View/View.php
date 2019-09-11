@@ -481,7 +481,7 @@ class View
   /**
    * Construct from constituents
    */
-  public function __construct($content = "", $context = [], $basepath = './')
+  public function __construct($content = "", $context = [], $basepath = '/')
   {
     $this->content = $content;
     $this->context = $context;

@@ -20,7 +20,7 @@ class ViewFactory
    * @param string
    * @return nano\View\View
    */
-  public static function make($whatever, $context = [], $basepath = './')
+  public static function make($whatever, $context = [], $basepath = '/')
   {
     if (is_object($whatever))
       return self::makeFromInstance($whatever, $context, $basepath);
@@ -44,7 +44,7 @@ class ViewFactory
   /**
    * Treat input as template filename
    */
-  private static function makeFromFile($file, $context = [], $basepath = './')
+  private static function makeFromFile($file, $context = [], $basepath = '/')
   {
     $filename = get_include_path() . $basepath . $file;
 
@@ -59,7 +59,7 @@ class ViewFactory
   /**
    * Treat input as view class name
    */
-  private static function makeFromClass($class, $context = [], $basepath = './')
+  private static function makeFromClass($class, $context = [], $basepath = '/')
   {
     if (!class_exists($class))
       error("Unknown view '$class'");
@@ -72,7 +72,7 @@ class ViewFactory
   /**
    * Treat input as view instance
    */
-  private static function makeFromInstance($instance, $context = [], $basepath = './')
+  private static function makeFromInstance($instance, $context = [], $basepath = '/')
   {
     if (! $instance instanceof View)
       error("Object of type $class must be an instance of View");
