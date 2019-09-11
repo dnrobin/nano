@@ -172,11 +172,6 @@ class Response
   /**
    * @var string
    */
-  protected $contentType;
-
-  /**
-   * @var string
-   */
   protected $cacheControl;
 
   /**
@@ -185,9 +180,9 @@ class Response
   protected $headers;
 
   /**
-   * @var mixed
+   * @var nano\Http\Body
    */
-  protected $body = null;
+  protected $body;
 
   /**
    * @var bool
@@ -246,7 +241,7 @@ class Response
     if (!in_array($contentType, self::CONTENT_TYPES))
       error("Unsuported response content type '$contentType'");
     
-    $this->contentType = $contentType;
+    $this->body->setContentType($contentType);
   }
 
   /**
@@ -254,7 +249,7 @@ class Response
    */
   public function getContentType()
   {
-    return $this->contentType;
+    return $this->body->getContentType();
   }
 
   /**
@@ -285,8 +280,10 @@ class Response
    */
   public function set($body)
   {
-    $this->body = $body;
-    @ob_clean(); // clear output buffer
+    // TODO: if priority should got to output buffers, what's with body->set()?
+    $this->body->set($body);
+
+    echo $body;
   }
 
   /**
@@ -294,7 +291,7 @@ class Response
    */
   public function clear()
   {
-    $this->body = null;
+    $this->body->clear();
     @ob_clean(); // also clear output buffer
   }
 
@@ -307,7 +304,7 @@ class Response
     if (ob_get_length() > 0)
       return ob_get_contents();
     
-    return $this->body;
+    return $this->body->get();
   }
 
   /**
@@ -359,7 +356,7 @@ class Response
     // remove any previously set headers
     header_remove();
     header("HTTP/{$this->version} {$this->status} " . self::REASON_PHRASE[$this->status] . "\n\r");
-      $this->headers->set('Content-Type', $this->contentType);
+      $this->headers->set('Content-Type', $this->body->getContentType());
       $this->headers->set('Connection', 'Closed');
       $this->headers->set('Cache-Control', 'no-cache');
       $this->headers->send();
@@ -373,40 +370,7 @@ class Response
       ob_flush();
     @ob_end_clean();
 
-    // format body according to content-type
-    $body = $this->body;
-
-    switch ($this->contentType)
-    {
-      case "application/json":
-        if (! $body instanceof \json) {
-          if (!is_array($body) && !is_object($body))
-            $body = '{}';
-          
-          $body = json_encode($body, JSON_PRETTY_PRINT);
-        }
-        break;
-      
-      case "application/xml":
-        // TODO:
-        break;
-      
-      case "text/html":
-        if (! $body instanceof \nano\View\View) {
-          if (is_array($body))
-            $body = print_r(object_to_array($body), true);
-          
-          else if (is_object($body))
-            $body = "";
-        }
-        break;
-
-      case "text/xml":
-        // TODO:
-        break;
-    }
-
-    echo $body;
+    echo $this->body;
 
     $this->responseAlreadySent = true;
   }
@@ -431,6 +395,7 @@ class Response
   public function __construct($body = null, $status = self::OK)
   {
     $this->headers = new Headers();
+    $this->body = new Body();
 
     $this->setContentType("application/json");
     $this->setVersion('1.1');

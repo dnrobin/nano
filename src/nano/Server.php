@@ -10,7 +10,7 @@
 
 namespace nano;
 
-require_once __DIR__ . '/Helpers/helpers.php';
+require_once __DIR__ . '/functions.php';
 
 class Server
 {
@@ -126,7 +126,7 @@ class Server
       $result = (new Routing\RouteStrategy($route, self::$request, $this->response))->execute();
 
       if ($result !== null)
-        $this->response->set($result);
+        $this->response->set($result);  // Note: this overwrites any previous output!
     }
 
     $this->response->send();
@@ -140,7 +140,7 @@ class Server
    * @param array, optional configuration
    * @return void
    */
-  public function __construct($config = [])
+  public function __construct($config = [], $router = null)
   {
     $default = [
       'basepath' => '',
@@ -163,7 +163,10 @@ class Server
     // prevent direct output in production mode
     $this->response->captureOutput();
 
-    $this->router = new Routing\Router();
+    if (!$router)
+      $router = new Routint\Router();
+
+    $this->router = $router;
 
     // set new default path
     set_include_path(realpath($config['basepath']));

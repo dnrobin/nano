@@ -8,44 +8,19 @@
  * last-update 09-2019
  */
 
-require_once __DIR__ . '/json.php';
-
-if (!function_exists('notice'))
-{
-	function notice($msg)
-	{
-		if ($_ENV['APP_MODE'] == 'DEVELOPMENT')
-			user_error($msg, E_USER_NOTICE);
-	}
-}
-
-if (!function_exists('warn'))
-{
-	function warn($msg)
-	{
-		if ($_ENV['APP_MODE'] == 'DEVELOPMENT')
-			user_error($msg, E_USER_WARNING);
-	}
-}
-
-if (!function_exists('error'))
-{
-	function error($msg)
-	{
-		if ($_ENV['APP_MODE'] == 'DEVELOPMENT')
-			user_error($msg, E_USER_ERROR);
-	}
-}
-
 if (!function_exists('view'))
 {
-	function view($name, $context = [], $basepath = '')
+	function view($name, $context = [], $namespace = '')
 	{
-		$file = str_replace('.', '/', $name);
-		$basepath = $basepath . dirname($file) . '/';
-		$filename = array_pop(explode('/',$file)) . '.html';
+		return nano\View\ViewFactory::constructFromName($name, $context, $namespace);
+	}
+}
 
-		return nano\View\ViewFactory::make($filename, $context, $basepath);
+if (!function_exists('json'))
+{
+	function json($json)
+	{
+		return new nano\View\Json($json);
 	}
 }
 
@@ -54,6 +29,33 @@ if (!function_exists('object_to_array'))
 	function object_to_array($object)
 	{
 		return json_decode(json_encode($object), true);
+	}
+}
+
+if (!function_exists('notice'))
+{
+	function notice($msg)
+	{
+		// TODO: don't output in production mode
+		user_error($msg, E_USER_NOTICE);
+	}
+}
+
+if (!function_exists('warn'))
+{
+	function warn($msg)
+	{
+		// TODO: don't output in production mode
+		user_error($msg, E_USER_WARNING);
+	}
+}
+
+if (!function_exists('error'))
+{
+	function error($msg)
+	{
+		// TODO: don't output in production mode
+		user_error($msg, E_USER_ERROR);
 	}
 }
 

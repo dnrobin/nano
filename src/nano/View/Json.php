@@ -8,12 +8,14 @@
  * last-update 09-2019
  */
 
-class json implements ArrayAccess
+namespace nano\View;
+
+class Json implements \ArrayAccess
 {
   /**
    * @var array
    */
-  private $_data;
+  private $data;
 
   /**
    * Set content
@@ -21,28 +23,20 @@ class json implements ArrayAccess
   public function set($json)
   {
     if (is_array($json)){
-      $this->_data = $json;
+      $this->data = $json;
     }
 
     else if (is_object($json)) {
-      $this->_data = (array)$json;
+      $this->data = (array)$json;
     }
 
     else if (is_string($json)) {
-      $this->_data = json_decode($json, true);
+      $this->data = json_decode($json, true);
     }
 
     else {
-      $this->_data = [$json];
+      $this->data = [$json];
     }
-  }
-
-  /**
-   * Get JSON string
-   */
-  public function string()
-  {
-    return json_encode($this->_data, JSON_PRETTY_PRINT);
   }
 
   /**
@@ -56,33 +50,38 @@ class json implements ArrayAccess
   /**
    * ArrayAccess
    */
-
   public function offsetExists ($offset)
   {
-    return isset($this->_data[$offset]);
+    return isset($this->data[$offset]);
   }
 
   public function offsetGet ($offset)
   {
-    return new json(@$this->_data[$offset]);
+    return new json(@$this->data[$offset]);
   }
 
   public function offsetSet ($offset, $value)
   {
-    $this->_data[$offset] = $value;
+    $this->data[$offset] = $value;
   }
 
   public function offsetUnset ($offset)
   {
-    unset($this->_data[$offset]);
+    unset($this->data[$offset]);
   }
 
+  /**
+   * Construct from arbitrary
+   */
   function __construct($json = null)
   {
     if ($json)
       $this->set($json);
   }
 
+  /**
+   * Accessors
+   */
   function __get($name)
   {
     return $this[$name];
@@ -95,17 +94,20 @@ class json implements ArrayAccess
 
   function __toString()
   {
-    return $this->string();
+    return json_encode($this->data, JSON_PRETTY_PRINT);
   }
 
   function toArray()
   {
-    return $this->_data;
+    return $this->data;
   }
 
+  /**
+   * Construct from file content
+   */
   public static function fromFile($filename)
   {
-    $j = new json();
+    $j = new Json();
     $j->load($filename);
     return $j;
   }

@@ -12,124 +12,85 @@ namespace nano\View;
 
 class ViewFactory
 {
-  /**
-   * Construct a valid view instance
-   * 
-   * @param mixed
-   * @param array
-   * @param string
-   * @return nano\View\View
-   */
-  public static function make($whatever, $context = [], $basepath = '/')
+  public static function constructFromName($name, $context = [], $namespace = '')
   {
-    if (is_object($whatever))
-      return self::makeFromInstance($whatever, $context, $basepath);
-    
-    if (is_string($whatever))
-    {
-      $filename = get_include_path() . '/' . $basepath . $whatever;
+    $file = array_pop(explode('.', $name));
+		$namespace = preg_replace('/\.\w+$/','',$namespace . '.' . $name);
+		$filename = str_replace('.','/',$namespace) . '/' . $file . '.html';
 
-      if (file_exists($filename))
-        return self::makeFromFile($filename, $context, $basepath);
+    if (!file_exists($filename))
+      error("view file '$filename' not found");
 
-      if (class_exists($whatever))
-        return self::makeFromClass($whatever, $context, $basepath);
+    $contents = file_get_contents(get_include_path() . '/' . $filename);
 
-      return new View($whatever, $context, $basepath);
-    }
-
-    error("Invalid argument in view factory");
+    return new View($contents, $context, $namespace);
   }
 
-  /**
-   * Treat input as template filename
-   */
-  private static function makeFromFile($filename, $context = [], $basepath = '/')
+  public static function constructFromObject($object, $props = [], $context = [], $namespace = '')
   {
-    $contents = file_get_contents($filename);
-
-    return new View($contents, $context, $basepath . dirname($file));
-  }
-
-  /**
-   * Treat input as view class name
-   */
-  private static function makeFromClass($class, $context = [], $basepath = '/')
-  {
-    if (!class_exists($class))
-      error("Unknown view '$class'");
-    
-    $instance = new $class('', $context, $basepath);
-
-    return self::makeFromInstance($instance);
-  }
-
-  /**
-   * Treat input as view instance
-   */
-  private static function makeFromInstance($instance, $context = [], $basepath = '/')
-  {
-    if (! $instance instanceof View)
-      error("Object of type $class must be an instance of View");
+    if (! $object instanceof View)
+      error("view object of type '$object' must be instance of View");
 
     $contents = "";
     
-    if (property_exists($instance, 'template'))
+    if (property_exists($object, 'template'))
     {
-      $template = $instance->template;
+      $template = $object->template;
 
       if (is_array($template))
       {
         if (!isset($template['file']))
           error("Template must define a source file");
         
-        $file = $template['file'];
-        $filename = get_include_path() . $basepath . $file;
+        $file = str_replace('.','/',$namespace) . '/' . $template['file'];
+        $filename = get_include_path() . '/' . $file;
 
         if (!file_exists($filename))
           error("View file '$file' not found");
         
         $contents = file_get_contents($filename);
-
-        // TODO: process other options
       }
 
       else {
-        $contents = $template;
+        $contents = $object->template;
       }
     }
 
-    $instance->set($contents);
+    $object->set($contents);
 
-    if (property_exists($instance, 'data'))
+    if (property_exists($object, 'data'))
     {
-      $data = $instance->data;
+      $data = $object->data;
 
       if (!is_array($data))
-        error("Wrong format for 'data' in view");
+        error("wrong format for 'data' in view");
 
-      foreach ($data as $name => $value)
-      {
+      foreach ($data as $name => $value) {
         if (!is_string($name))
-          warn("Datum without a name is ignored");
+          warn("datum without a name is ignored");
         
-        $instance->$name = $value;
+        $object[$name] = $value;
       }
     }
 
-    if (property_exists($instance, 'views'))
+    if (property_exists($object, 'views'))
     {
-      $views = $instance->views;
+      $views = $object->views;
 
       if (!is_array($views))
-        error("Wrond format for 'views' in view");
+        error("wrond format for 'views' in view");
 
       foreach ($views as $view)
       {
-        $instance->register($view[0], $view[1]);
+        $object->register($view[0], $view[1]);
       }
     }
 
-    return $instance;
+    if (method_exists($object, 'created'))
+    {
+      call_user_func_array([$object, 'created'], $props);
+    }
+
+    return $object;
   }
 }

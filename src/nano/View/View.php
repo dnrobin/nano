@@ -8,7 +8,7 @@
  * last-update 09-2019
  */
 
- namespace nano\View;
+namespace nano\View;
 
 /**
  * The view helper class is a stateful context driven template parser
@@ -18,21 +18,28 @@
 
 // TODO : doc template syntax
 
-class View
+class View implements \ArrayAccess
 {
   const INL_OPERATORS = ['@'];
   const BLK_OPERATORS = ['#'];
   const IDENT_EXPR    = "(?<name>\w[\w\d\.\[\]]*)(?<pipes>(?:\s*\|\s*\w+)*)";
 
   /**
-   * Basepath for relative views
+   * namespace for relative views
    * 
    * @var array
    */
-  private $basepath;
+  private $namespace;
 
   /**
-   * Local template scope
+   * Global view scope variable
+   * 
+   * @var array
+   */
+  private static $global = [];
+
+  /**
+   * Local view scope variables
    * 
    * @var array
    */
@@ -50,7 +57,26 @@ class View
    * 
    * @var array
    */
-  private $subviews = [];
+  private $views = [];
+
+  /**
+   * Set global (shared) context
+   */
+  public static function global($name, $value)
+  {
+    self::$global[$name] = $value;
+  }
+
+  /**
+   * Set view content
+   * 
+   * @param string
+   * @return void
+   */
+  public function set($content)
+  {
+    $this->content = $content;
+  }
 
   /**
    * Register a subview
@@ -61,7 +87,10 @@ class View
    */
   public function register($name, $class)
   {
-    $this->subviews[$name] = $class;
+    if (\preg_match('/\[|\]|\.|\s+/', $name))
+      error("invalid name '$name' for subview in register");
+    
+    $this->views[$name] = $class;
   }
 
   /**
@@ -120,10 +149,10 @@ class View
    * @param string
    * @return mixed
    */
-  public function lookup($name)
+  public function lookup($name, $context = null)
   {
     $parts = array_reverse(explode('.', $name));
-    $value = $this->context;
+    $value = array_merge(self::$global, $this->context); // local vars obscure global vars
 
     do
     {
@@ -203,11 +232,11 @@ class View
           $result = @eval("return ($expr) ? true : false;");
 
           if ($result) {
-            return (new View($body, $this->context, $this->basepath))->reduce();
+            return (new View($body, $this->context, $this->namespace))->reduce();
           }
 
           else if ($else) {
-            return (new View($else, $this->context, $this->basepath))->reduce();
+            return (new View($else, $this->context, $this->namespace))->reduce();
           }
 
           return "";
@@ -269,7 +298,7 @@ class View
             if (@$m['var'])
               $context[$m['var']] = $item;
             
-            $replace .= (new View($body, $context, $this->basepath))->reduce();
+            $replace .= (new View($body, $context, $this->namespace))->reduce();
           }
 
           return $replace;
@@ -299,20 +328,8 @@ class View
               )?
             $~xsJ", $expr, $m)) break;
 
-          if (preg_match('/\[|\]|\./', $name)) {
+          if (preg_match('/\[|\]/', $name)) {
             $error = "invalid name for subview";
-            break;
-          }
-
-          if (!isset($this->subviews[$name])) {
-            $error = "subview does not exist";
-            break;
-          }
-          
-          $viewClass = $this->subviews[$name];
-
-          if (!class_exists($viewClass)) {
-            $error = "view instance does not exist";
             break;
           }
 
@@ -332,54 +349,33 @@ class View
             }
           }
 
-          $view = new $viewClass('', ['parent' => $this->context], $this->basepath);
+          $context = ['parent' => $this->context];
 
-          if (! $view instanceof View) {
-            $error = "invalid view instance";
-            break;
+          if (isset($this->views[$name]))
+          {
+            $class = $this->views[$name];
+
+            if (!class_exists($class))
+              error("view class '$class' does not exist");
+
+            $object = new $class();
+
+            $view = ViewFactory::constructFromObject($object, $props, $context, 
+              preg_replace('/\.\w+$/', '', $this->namespace . '.' . $name));
           }
 
-          if (@$view->data) {
-            foreach (@$view->data as $name => $value)
-            {
-              $view->$name = $value;
-            }
+          else {
+            $view = ViewFactory::constructFromName($name, $context , $this->namespace);
           }
 
-          if (@$view->template) {
-            if (is_array($view->template)) {
-              $filename = $this->basepath . $view->template['file'];
-
-              $view->basepath = $this->basepath . dirname($view->template['file']);
-
-              if (file_exists($filename))
-                $view->content = file_get_contents($filename);
-            }
-
-            else {
-              $view->content = $view->template;
-            }
-          }
-
-          if (@$view->views) {
-            foreach (@$view->views as $def)
-            {
-              $view->register($def[0], $def[1]);
-            }
-          }
-
-          if (method_exists($view, 'create')) {
-            $view->create(...$props);
-          }
-
-          $reduce = $view->reduce();
+          $reduced = $view->reduce();
 
           if ($pipes)
           {
-            $reduce = $this->piped($reduce, $pipes);
+            $reduced = $this->piped($reduced, $pipes);
           }
 
-          return $reduce;
+          return $reduced;
 
         break;
       }
@@ -481,11 +477,11 @@ class View
   /**
    * Construct from constituents
    */
-  public function __construct($content = "", $context = [], $basepath = '/')
+  public function __construct($content = '', $context = [], $namespace = '')
   {
     $this->content = $content;
     $this->context = $context;
-    $this->basepath = $basepath;
+    $this->namespace = $namespace;
   }
 
   /**
@@ -504,5 +500,28 @@ class View
   public function __toString()
   {
     return $this->reduce();
+  }
+
+  /**
+   * ArrayAccess
+   */
+  public function offsetExists ($offset)
+  {
+    return isset($this->context[$offset]);
+  }
+
+  public function offsetGet ($offset)
+  {
+    return @$this->context[$offset];
+  }
+
+  public function offsetSet ($offset, $value)
+  {
+    $this->context[$offset] = $value;
+  }
+
+  public function offsetUnset ($offset)
+  {
+    unset($this->context[$offset]);
   }
 }

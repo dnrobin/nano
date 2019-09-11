@@ -34,7 +34,14 @@ class RouteStrategy
    */
   public function execute()
   {
-    return ($this->closure)(...($this->arguments));
+    $result = ($this->closure)(...($this->arguments));
+
+    if ($result instanceof \nano\Reducible)
+    {
+      return $result->reduce();
+    }
+
+    return $result;
   }
 
   /**
@@ -51,11 +58,21 @@ class RouteStrategy
 
     $handler = $route->getHandler();
 
-    if (!is_callable($handler)) {
+    if (!is_callable($handler))
+    {
       if (!is_array($handler))
         error("Invalid handler supplied for route");
+
+      if (isset($handler['options']))
+      {
+        foreach (@$handler['options'] as $name => $value)
+        {
+          if ($name == 'content-type')
+            $response->setContentType($value);
+        }
+      }
       
-      $handler = @$handler['handler'];
+      $handler = $handler['handler'];
     }
 
     $newthis = new ContextContainer();

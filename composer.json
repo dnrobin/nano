@@ -25,7 +25,7 @@
       "nano\\": "./src/nano/"
     },
     "files": [
-      "src/nano/Helpers/helpers.php"
+      "src/nano/functions.php"
     ]
   }
 }
