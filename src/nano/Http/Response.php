@@ -392,11 +392,13 @@ class Response
         break;
       
       case "text/html":
-        if (is_array($body))
-          $body = print_r(object_to_array($body), true);
-        
-        else if (is_object($body))
-          $body = "";
+        if (! $body instanceof \nano\View\View) {
+          if (is_array($body))
+            $body = print_r(object_to_array($body), true);
+          
+          else if (is_object($body))
+            $body = "";
+        }
         break;
 
       case "text/xml":
