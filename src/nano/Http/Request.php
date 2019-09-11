@@ -26,8 +26,7 @@ class Request
 	];
 
 	const HTTP_METHODS = [
-		"GET", "PUT", "PATCH", "POST", "DELETE",
-		"OPTIONS", "HEAD", "TRACE", "CONNECT"
+		"GET", "PUT", "PATCH", "POST", "DELETE", "OPTIONS", "HEAD"
 	];
 
 	/**

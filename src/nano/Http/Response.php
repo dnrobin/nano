@@ -376,26 +376,32 @@ class Response
     // format body according to content-type
     $body = $this->body;
 
-    if (is_array($body) || is_object($body))
+    switch ($this->contentType)
     {
-      switch ($this->contentType)
-      {
-        case "application/json":
+      case "application/json":
+        if (! $body instanceof \json) {
+          if (!is_array($body) && !is_object($body))
+            $body = '{}';
+          
           $body = json_encode($body, JSON_PRETTY_PRINT);
-          break;
-        
-        case "application/xml":
-          // TODO:
-          break;
-        
-        case "text/html":
+        }
+        break;
+      
+      case "application/xml":
+        // TODO:
+        break;
+      
+      case "text/html":
+        if (is_array($body))
           $body = print_r(object_to_array($body), true);
-          break;
+        
+        else if (is_object($body))
+          $body = "";
+        break;
 
-        case "text/xml":
-          // TODO:
-          break;
-      }
+      case "text/xml":
+        // TODO:
+        break;
     }
 
     echo $body;

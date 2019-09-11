@@ -39,21 +39,12 @@ if (!function_exists('error'))
 
 if (!function_exists('view'))
 {
-	function view($whatever, $context = [], $basepath = './')
+	function view($name, $context = [], $basepath = './')
 	{
-		$basepath = get_include_path() . $basepath;
-		$filename = $basepath . $whatever;
+		$file = str_replace('.', '/', $name);
+		$filename = get_include_path() . $basepath . $file . '.html';
 
-		if (is_object($context))
-			$context = object_to_array($context);
-
-		if (!file_exists($filename)) {
-			return new nano\View\View($whatever, $context, $basepath);
-		}
-
-		$content = file_get_contents($filename);
-		
-		return new nano\View\View($content, $context, $basepath);
+		return nano\View\ViewFactory::make($filename, $context, $basepath . dirname($file));
 	}
 }
 
