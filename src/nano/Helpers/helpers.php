@@ -42,7 +42,7 @@ if (!function_exists('view'))
 	function view($name, $context = [], $basepath = './')
 	{
 		$file = str_replace('.', '/', $name);
-		$filename = get_include_path() . $basepath . $file . '.html';
+		$filename = get_include_path() . '/' . $basepath . $file . '.html';
 
 		return nano\View\ViewFactory::make($filename, $context, $basepath . dirname($file));
 	}
