@@ -27,10 +27,10 @@ class ViewFactory
     
     if (is_string($whatever))
     {
-      $filename = get_include_path() . $basepath . $whatever;
+      $filename = get_include_path() . '/' . $basepath . $whatever;
 
       if (file_exists($filename))
-        return self::makeFromFile($whatever, $context, $basepath);
+        return self::makeFromFile($filename, $context, $basepath);
 
       if (class_exists($whatever))
         return self::makeFromClass($whatever, $context, $basepath);
@@ -38,19 +38,14 @@ class ViewFactory
       return new View($whatever, $context, $basepath);
     }
 
-    error("Invalid argument to view factory");
+    error("Invalid argument in view factory");
   }
 
   /**
    * Treat input as template filename
    */
-  private static function makeFromFile($file, $context = [], $basepath = '/')
+  private static function makeFromFile($filename, $context = [], $basepath = '/')
   {
-    $filename = get_include_path() . $basepath . $file;
-
-    if (!file_exists($filename))
-      error("View template file '$file' not found");
-    
     $contents = file_get_contents($filename);
 
     return new View($contents, $context, $basepath . dirname($file));

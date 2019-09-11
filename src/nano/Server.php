@@ -143,7 +143,7 @@ class Server
   public function __construct($config = [])
   {
     $default = [
-      'basepath' => '/',
+      'basepath' => '',
       'app-env' => 'production',
       'content-type' => 'application/json'
     ];
@@ -171,5 +171,14 @@ class Server
     // TODO: find a better way to construct responses based pipeline node events!
     $_ENV['request'] = self::$request;
     $_ENV['response'] = $this->response;
+  }
+
+  /**
+   * Make sure a default response is sent back in case the server was not run
+   */
+  function __destruct()
+  {
+    if (!$this->response->isSent())
+      $this->response->send();
   }
 }

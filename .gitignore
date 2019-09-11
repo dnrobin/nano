@@ -8,3 +8,4 @@ composer.phar
 
 # other
 /bin/
+/test/

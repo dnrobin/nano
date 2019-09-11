@@ -1,6 +1,6 @@
 {
-  "name": "nano",
-  "description": "nano API Framework",
+  "name": "nano/nano",
+  "description": "nano api framework",
   "keywords": [
     "framework",
     "api"
@@ -22,10 +22,10 @@
   "require-dev": {},
   "autoload": {
     "psr-4": {
-      "nano\\": "src/nano/"
+      "nano\\": "./src/nano/"
     },
     "files": [
-      "src/helpers.php"
+      "src/nano/Helpers/helpers.php"
     ]
   }
 }

@@ -42,9 +42,10 @@ if (!function_exists('view'))
 	function view($name, $context = [], $basepath = '')
 	{
 		$file = str_replace('.', '/', $name);
-		$filename = realpath(get_include_path()) . $basepath . $file . '.html';
+		$basepath = $basepath . dirname($file) . '/';
+		$filename = array_pop(explode('/',$file)) . '.html';
 
-		return nano\View\ViewFactory::make($filename, $context, $basepath . dirname($file));
+		return nano\View\ViewFactory::make($filename, $context, $basepath);
 	}
 }
 

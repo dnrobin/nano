@@ -412,6 +412,16 @@ class Response
   }
 
   /**
+   * Check if response was sent
+   * 
+   * @return bool
+   */
+  public function isSent()
+  {
+    return $this->responseAlreadySent;
+  }
+
+  /**
    * Construct response object
    * 
    * @param mixed
