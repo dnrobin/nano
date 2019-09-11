@@ -39,7 +39,7 @@ if (!function_exists('error'))
 
 if (!function_exists('view'))
 {
-	function view($name, $context = [], $basepath = './')
+	function view($name, $context = [], $basepath = '')
 	{
 		$file = str_replace('.', '/', $name);
 		$filename = realpath(get_include_path()) . '/' . $basepath . $file . '.html';
