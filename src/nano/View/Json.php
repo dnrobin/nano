@@ -115,7 +115,7 @@ class Json implements \ArrayAccess
   {
     $j = new Json();
 
-    die ("file_exists '$filename'" . file_exists($filename));
+    echo "file_exists '$filename': " . file_exists($filename) . "\n<br>";
 
     if (file_exists($filename))
       $j->set(file_get_contents($filename, true));
