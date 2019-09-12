@@ -361,11 +361,11 @@ class View implements \ArrayAccess
             $object = new $class();
 
             $view = ViewFactory::constructFromObject($object, $props, $context, 
-              preg_replace('/\.\w+$/', '', $this->namespace . '.' . $name));
+              preg_replace('/^\/+|\/(?=\/+)|\w+$/', '', $this->namespace . '/' . str_replace('.','/',$name)));
           }
 
           else {
-            $view = ViewFactory::constructFromName($name, $context , $this->namespace);
+            $view = ViewFactory::constructFromName(str_replace('.','/',$name), $context , $this->namespace);
           }
 
           $reduced = $view->reduce();

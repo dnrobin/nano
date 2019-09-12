@@ -14,14 +14,15 @@ class ViewFactory
 {
   public static function constructFromName($name, $context = [], $namespace = '')
   {
-    $file = array_pop(explode('.', $name));
-		$namespace = preg_replace('/\.\w+$/','',$namespace . '.' . $name);
-		$filename = str_replace('.','/',$namespace) . '/' . $file . '.html';
+    $full = preg_replace('/^\/+|\/(?=\/+)/', '', $namespace . '/' . $name);
+
+    $filename = get_include_path() . '/' . $full . '.html';
+    $namespace = dirname($full) . '/';
 
     if (!file_exists($filename))
       error("view file '$filename' not found");
 
-    $contents = file_get_contents(get_include_path() . '/' . $filename);
+    $contents = file_get_contents($filename);
 
     return new View($contents, $context, $namespace);
   }
@@ -41,12 +42,11 @@ class ViewFactory
       {
         if (!isset($template['file']))
           error("Template must define a source file");
-        
-        $file = str_replace('.','/',$namespace) . '/' . $template['file'];
-        $filename = get_include_path() . '/' . $file;
+
+        $filename = get_include_path() . '/' . $template['file'];
 
         if (!file_exists($filename))
-          error("View file '$file' not found");
+          error("View file '{$filename}' not found");
         
         $contents = file_get_contents($filename);
       }
