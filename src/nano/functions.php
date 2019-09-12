@@ -12,9 +12,12 @@ if (!function_exists('redirect'))
 {
 	function redirect($url, $statusCode = 303)
 	{
-		header_remove();
-		header('Location: ' . $url, true, $statusCode);
-		die();
+		if (!headers_sent()) {
+			header('Location: ' . $url, true, $statusCode);
+			die();
+		}
+
+		echo "<script>window.location.replace('$url')</script>";
 	}
 }
 

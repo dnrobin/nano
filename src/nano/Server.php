@@ -12,6 +12,9 @@ namespace nano;
 
 require_once __DIR__ . '/functions.php';
 
+// TODO: turn off errors in production
+// error_reporting(0);
+
 class Server
 {
   /**
@@ -171,7 +174,7 @@ class Server
     // set new default path
     set_include_path(realpath($config['basepath']));
 
-    // TODO: find a better way to construct responses based pipeline node events!
+    // TODO: find a better way to construct responses based pipeline events!
     $_ENV['request'] = self::$request;
     $_ENV['response'] = $this->response;
   }
