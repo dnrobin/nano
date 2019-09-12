@@ -32,6 +32,9 @@ class ViewFactory
     if (! $object instanceof View)
       error("view object of type '$object' must be instance of View");
 
+    $object->setContext($context);
+    $object->setNamespace($namespace);
+
     $contents = "";
     
     if (property_exists($object, 'template'))

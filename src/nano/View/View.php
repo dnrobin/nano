@@ -79,6 +79,28 @@ class View implements \ArrayAccess
   }
 
   /**
+   * Set view context
+   * 
+   * @param array
+   * @return void
+   */
+  public function setContext(array $context)
+  {
+    $this->context = $context;
+  }
+
+  /**
+   * Set view namespace
+   * 
+   * @param string
+   * @return void
+   */
+  public function setNamespace(string $namespace)
+  {
+    $this->namespace = $namespace;
+  }
+
+  /**
    * Register a subview
    * 
    * @param string
