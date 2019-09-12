@@ -40,56 +40,30 @@ class Json implements \ArrayAccess
   }
 
   /**
-   * Load from JSON file
+   * Get name in content
    */
-  public function load($filename)
+  private function get($name)
   {
-    $this->set(file_get_contents($filename, true));
+    if (!isset($this->data[$name]))
+      return null;
+    
+    if (is_array($this->data[$name]))
+      return new json($this->data[$name]);
+
+    return $this->data[$name];
   }
 
   /**
-   * ArrayAccess
-   */
-  public function offsetExists ($offset)
-  {
-    return isset($this->data[$offset]);
-  }
-
-  public function offsetGet ($offset)
-  {
-    return new json(@$this->data[$offset]);
-  }
-
-  public function offsetSet ($offset, $value)
-  {
-    $this->data[$offset] = $value;
-  }
-
-  public function offsetUnset ($offset)
-  {
-    unset($this->data[$offset]);
-  }
-
-  /**
-   * Construct from arbitrary
-   */
-  function __construct($json = null)
-  {
-    if ($json)
-      $this->set($json);
-  }
-
-  /**
-   * Accessors
+   * Overload accessors
    */
   function __get($name)
   {
-    return $this[$name];
+    return $this->get($name);
   }
 
   function __set($name, $value)
   {
-    $this[$name] = $value;
+    $this->data[$name] = $value;
   }
 
   function __toString()
@@ -103,12 +77,47 @@ class Json implements \ArrayAccess
   }
 
   /**
+   * ArrayAccess
+   */
+  public function offsetExists ($name)
+  {
+    return isset($this->data[$name]);
+  }
+
+  public function offsetGet ($name)
+  {
+    return $this->get($name);
+  }
+
+  public function offsetSet ($name, $value)
+  {
+    $this->data[$name] = $value;
+  }
+
+  public function offsetUnset ($name)
+  {
+    unset($this->data[$name]);
+  }
+
+  /**
+   * Construct from arbitrary
+   */
+  function __construct($json = null)
+  {
+    if ($json)
+      $this->set($json);
+  }
+
+  /**
    * Construct from file content
    */
   public static function fromFile($filename)
   {
     $j = new Json();
-    $j->load($filename);
+
+    if (file_exists($filename))
+      $j->set(file_get_contents($filename, true));
+    
     return $j;
   }
 }
