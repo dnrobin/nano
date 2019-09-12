@@ -22,7 +22,7 @@ class View implements \ArrayAccess
 {
   const INL_OPERATORS = ['@'];
   const BLK_OPERATORS = ['#'];
-  const IDENT_EXPR    = "(?<name>\w[\w\d\.\[\]]*)(?<pipes>(?:\s*\|\s*\w+)*)";
+  const IDENT_EXPR    = "(?<name>\\$?\w[\w\d\.\[\]]*)(?<pipes>(?:\s*\|\s*\w+)*)";
 
   /**
    * namespace for relative views
@@ -173,8 +173,15 @@ class View implements \ArrayAccess
    */
   public function lookup($name)
   {
+    if ($name[0] == '$') {
+      $value = self::$global; // global state is accessed by prefixing name wih '$'
+      $name = substr($name, 1);
+    }
+    else {
+      $value = $this->context;
+    }
+
     $parts = array_reverse(explode('.', $name));
-    $value = array_merge(self::$global, $this->context); // local vars obscure global vars
 
     do
     {
@@ -349,7 +356,7 @@ class View implements \ArrayAccess
               )?
             $~xsJ", $expr, $m)) break;
 
-          if (preg_match('/\[|\]/', $name)) {
+          if (preg_match('/\[|\]|\$/', $name)) {
             $error = "invalid name for subview";
             break;
           }
