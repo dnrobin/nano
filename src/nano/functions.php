@@ -8,11 +8,14 @@
  * last-update 09-2019
  */
 
-function redirect($url, $statusCode = 303)
+if (!function_exists('redirect'))
 {
-	die("CALLRED");
-	header('Location: ' . $url, true, $statusCode);
-	die();
+	function redirect($url, $statusCode = 303)
+	{
+		die("CALLRED");
+		header('Location: ' . $url, true, $statusCode);
+		die();
+	}
 }
 
 if (!function_exists('view'))
