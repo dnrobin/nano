@@ -17,7 +17,8 @@ if (!function_exists('redirect'))
 			die();
 		}
 
-		die("<script>window.location.replace('$url')</script>");
+		echo "<script>window.location.replace('$url')</script>";
+		exit();
 	}
 }
 
