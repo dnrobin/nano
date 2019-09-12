@@ -365,10 +365,11 @@ class View implements \ArrayAccess
             if (!class_exists($class))
               error("view class '$class' does not exist");
 
-            $object = new $class();
+            $namespace = preg_replace('/^\/+|\/(?=\/+)|\w+$/', '', $this->namespace . '/' . str_replace('.','/',$name));
 
-            $view = ViewFactory::constructFromObject($object, $props, $context, 
-              preg_replace('/^\/+|\/(?=\/+)|\w+$/', '', $this->namespace . '/' . str_replace('.','/',$name)));
+            $object = new $class('', [], $namespace);
+
+            $view = ViewFactory::constructFromObject($object, $props, $context, $namespace);
           }
 
           else {
