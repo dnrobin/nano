@@ -18,9 +18,9 @@ if (!function_exists('view'))
 
 if (!function_exists('json'))
 {
-	function json($json)
+	function json($filename)
 	{
-		return new nano\View\Json($json);
+		return nano\View\Json::fromFile($filename);
 	}
 }
 
