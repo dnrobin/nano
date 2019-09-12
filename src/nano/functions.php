@@ -34,7 +34,7 @@ if (!function_exists('json'))
 {
 	function json($input)
 	{
-		if (file_exists($input))
+		if (is_string($input) && file_exists($input))
 			return nano\View\Json::fromFile($input);
 
 		return new nano\View\Json($input);
