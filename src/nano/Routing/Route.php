@@ -77,10 +77,6 @@ class Route
     if ($this->pattern !== '/*')
     {
       $path = $request->getPath();
-
-      if (strlen($path) > 1 && $path[strlen($path) - 1] == '/') {
-        $path = substr($path, 0, strlen($path) - 1);
-      }
       
 			if (!preg_match("~^{$this->pattern}$~", $path, $arguments)) {
 				return false;
