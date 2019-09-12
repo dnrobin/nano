@@ -353,7 +353,14 @@ class View implements \ArrayAccess
 
           if (isset($this->views[$name]))
           {
-            $class = $this->views[$name];
+            if (is_array($this->views[$name])) {
+              $class = $this->views[$name]['class'];
+              $props = array_merge(@$this->views[$name]['props'], $props);
+            }
+
+            else {
+              $class = $this->views[$name];
+            }
 
             if (!class_exists($class))
               error("view class '$class' does not exist");
