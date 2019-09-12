@@ -247,7 +247,6 @@ class View implements \ArrayAccess
             if (is_object($value))
               return $a[0];
 
-            echo "other";
             return $value;
           }, $expr);
 
