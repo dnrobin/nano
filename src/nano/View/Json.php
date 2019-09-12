@@ -122,7 +122,7 @@ class Json implements \ArrayAccess, \IteratorAggregate
    * IteratorAggregate
    */
   public function getIterator() {
-      return new ArrayIterator($this->data);
+      return new \ArrayIterator($this->data);
   }
 
   /**
