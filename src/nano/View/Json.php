@@ -10,7 +10,7 @@
 
 namespace nano\View;
 
-class Json implements \ArrayAccess
+class Json implements \ArrayAccess, \IteratorAggregate
 {
   /**
    * @var array
@@ -116,6 +116,13 @@ class Json implements \ArrayAccess
   public function offsetUnset ($name)
   {
     unset($this->data[$name]);
+  }
+
+  /**
+   * IteratorAggregate
+   */
+  public function getIterator() {
+      return new ArrayIterator($this->data);
   }
 
   /**
