@@ -352,9 +352,9 @@ class Response
       die(self::INTERNAL_SERVER_ERROR);
     }
 
-    $headers = headers_list();
-    print_r($headers);
-    if (in_array($headers['Location']))
+    $headers = new Headers();
+    var_dump($headers);
+    if ($headers->has('Location'))
       return;
 
     header_remove();
