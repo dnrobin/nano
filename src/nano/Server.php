@@ -181,7 +181,7 @@ class Server
    */
   function __destruct()
   {
-    if (!$this->response->isSent())
+    if (!$this->response->wasSent())
       $this->response->send();
   }
 }

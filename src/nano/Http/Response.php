@@ -346,14 +346,17 @@ class Response
       return;
     }
     
-    // headers should not already have been sent!
     if (headers_sent())
     {
       // TODO: provide feedback for the error?
       die(self::INTERNAL_SERVER_ERROR);
     }
 
-    // remove any previously set headers
+    $headers = headers_list();
+    print_r($headers);
+    if (in_array($headers['Location']))
+      return;
+
     header_remove();
     header("HTTP/{$this->version} {$this->status} " . self::REASON_PHRASE[$this->status] . "\n\r");
       $this->headers->set('Content-Type', $this->body->getContentType());
@@ -361,11 +364,11 @@ class Response
       $this->headers->set('Cache-Control', 'no-cache');
       $this->headers->send();
     
-    // check body can be sent
+    // check status allows content
     if ($this->status >= 300)
       return;
 
-    // dump buffer output to body (if any)
+    // process the buffers
     if (ob_get_length() > 0)
       ob_flush();
     @ob_end_clean();
@@ -380,7 +383,7 @@ class Response
    * 
    * @return bool
    */
-  public function isSent()
+  public function wasSent()
   {
     return $this->responseAlreadySent;
   }
