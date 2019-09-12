@@ -18,6 +18,25 @@ class Json implements \ArrayAccess
   private $data;
 
   /**
+   * Load from file
+   */
+  public function load($filename)
+  {
+    if (!file_exists($filename))
+      error("json file '$filename' does not exist");
+
+    $this->set(file_get_contents($filename, true));
+  }
+
+  /**
+   * Save to file
+   */
+  public function save($filename)
+  {
+    file_put_contents($filename, $this->__toString());
+  }
+
+  /**
    * Set content
    */
   public function set($json)
@@ -114,12 +133,8 @@ class Json implements \ArrayAccess
   public static function fromFile($filename)
   {
     $j = new Json();
+    $j->load($filename);
 
-    if (!file_exists($filename))
-      error("json file '$filename' does not exist");
-
-    $j->set(file_get_contents($filename, true));
-    
     return $j;
   }
 }
