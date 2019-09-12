@@ -8,6 +8,15 @@
  * last-update 09-2019
  */
 
+if (!function_exists('redirect'))
+{
+	function redirect($url, $statusCode = 303)
+	{
+		header('Location: ' . $url, true, $statusCode);
+		die();
+	}
+}
+
 if (!function_exists('view'))
 {
 	function view($name, $context = [], $namespace = '')

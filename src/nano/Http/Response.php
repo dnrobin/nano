@@ -352,11 +352,6 @@ class Response
       die(self::INTERNAL_SERVER_ERROR);
     }
 
-    $headers = new Headers();
-    var_dump($headers);
-    if ($headers->has('Location'))
-      return;
-
     header_remove();
     header("HTTP/{$this->version} {$this->status} " . self::REASON_PHRASE[$this->status] . "\n\r");
       $this->headers->set('Content-Type', $this->body->getContentType());
