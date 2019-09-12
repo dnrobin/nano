@@ -171,7 +171,7 @@ class View implements \ArrayAccess
    * @param string
    * @return mixed
    */
-  public function lookup($name, $context = null)
+  public function lookup($name)
   {
     $parts = array_reverse(explode('.', $name));
     $value = array_merge(self::$global, $this->context); // local vars obscure global vars
@@ -519,7 +519,7 @@ class View implements \ArrayAccess
    */
   public function __get($name)
   {
-    return @$this->context[$name];
+    return $this->lookup($name);
   }
 
   public function __set($name, $value)
@@ -537,12 +537,13 @@ class View implements \ArrayAccess
    */
   public function offsetExists ($offset)
   {
-    return isset($this->context[$offset]);
+    return isset($this->context[$offset]) 
+        || isset($this->global[$offset]);
   }
 
   public function offsetGet ($offset)
   {
-    return @$this->context[$offset];
+    return $this->lookup($offset);
   }
 
   public function offsetSet ($offset, $value)
@@ -552,6 +553,10 @@ class View implements \ArrayAccess
 
   public function offsetUnset ($offset)
   {
-    unset($this->context[$offset]);
+    if (isset($this->context[$offset]))
+      unset($this->context[$offset]);
+
+    if (isset($this->global[$offset]))
+      unset($this->global[$offset]);
   }
 }
