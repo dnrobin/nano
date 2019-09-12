@@ -10,6 +10,7 @@
 
 function redirect($url, $statusCode = 303)
 {
+	die("CALLRED");
 	header('Location: ' . $url, true, $statusCode);
 	die();
 }
