@@ -80,9 +80,9 @@ class ViewFactory
       if (!is_array($views))
         error("wrond format for 'views' in view");
 
-      foreach ($views as $view)
+      foreach ($views as $view => $def)
       {
-        $object->register($view[0], $view[1]);
+        $object->register($view, $def);
       }
     }
 
