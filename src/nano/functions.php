@@ -12,6 +12,7 @@ if (!function_exists('redirect'))
 {
 	function redirect($url, $statusCode = 303)
 	{
+		header_remove();
 		header('Location: ' . $url, true, $statusCode);
 		die();
 	}
