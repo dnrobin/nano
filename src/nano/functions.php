@@ -32,9 +32,12 @@ if (!function_exists('view'))
 
 if (!function_exists('json'))
 {
-	function json($filename)
+	function json($input)
 	{
-		return nano\View\Json::fromFile($filename);
+		if (file_exists($input))
+			return nano\View\Json::fromFile($input);
+
+		return new nano\View\Json($input);
 	}
 }
 
