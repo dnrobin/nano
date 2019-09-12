@@ -20,7 +20,7 @@ class ViewFactory
     $namespace = dirname($full) . '/';
 
     if (!file_exists($filename))
-      error("view file '$filename' not found");
+      error("view '$name' not found");
 
     $contents = file_get_contents($filename);
 
@@ -46,7 +46,7 @@ class ViewFactory
         $filename = get_include_path() . '/' . $template['file'];
 
         if (!file_exists($filename))
-          error("View file '{$filename}' not found");
+          error("view file '{$template['file']}' not found");
         
         $contents = file_get_contents($filename);
       }
