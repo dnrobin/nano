@@ -19,6 +19,8 @@ set_error_handler(function ($code, $str, $file, $line)
 
 	echo " $str in $file ($line)\r\n";
 
+	if ($code == E_USER_ERROR) die();
+
 	return true;
 }, E_USER_NOTICE | E_USER_WARNING | E_USER_ERROR);
 
