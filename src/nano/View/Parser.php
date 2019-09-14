@@ -31,7 +31,7 @@ class Parser extends View
       }, $view->content
     );
 
-    // echo "--- I AM PARSING " . get_class($view) . " with content '$view->content'\nwith context" . print_r($view->local,true);
+    echo "--- I AM PARSING " . get_class($view) . " with content '$view->content'\nwith context" . print_r($view->local,true);
 
     $this->local = $view->local;
     $that = $this;
