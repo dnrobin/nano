@@ -49,6 +49,8 @@ class Parser extends View
           |
           (?!$blk|else)
           (?<ident>
+            (?<name>\$?\w[\w\d]*)
+            |
             \$?\w[\w\d.\[\]]*
           )
         )
