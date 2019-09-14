@@ -414,14 +414,14 @@ class Parser extends View
       'count' => function ($value) { return count($value); },
     ];
 
-    $pipes = explode('|', "mypipe");
-
-    echo "PIPES ".print_r($pipes, true)."END";
+    $pipes = explode('|', $pipexpr);
 
     if (!empty($pipes))
     {
       foreach ($pipes as $pipe)
       {
+        if (!$pipe) continue;
+        
         if (!isset($_pipes[trim($pipe)]))
           return false;
 
