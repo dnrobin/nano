@@ -245,7 +245,14 @@ class Parser extends View
         return $a[0];
       
       if (! $value instanceof View)
+      {
+        $pipe = $this->attributes(['pipe'=>0],$attr);
+
+        if ($pipe)
+          $value = $this->pipe($value, $pipe);
+        
         return $value;
+      }
 
       /*
       --------------------------
@@ -294,8 +301,8 @@ class Parser extends View
 
       $name = $m[1];
 
-      // if (!is_array($value))
-      //   return false;
+      if (!is_array($value))
+        return false;
       
       if (!isset($value[$name]))
         return false;
