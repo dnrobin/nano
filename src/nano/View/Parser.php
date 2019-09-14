@@ -270,7 +270,7 @@ class Parser extends View
 
       $value->local = array_merge($attr, ['parent' => $parent]);
 
-      echo get_class($value) . "->reduce()\n";
+      echo "calling " . get_class($value) . "->reduce() from parser\n";
       return $value->reduce();
       
     }, $content);
