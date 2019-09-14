@@ -261,12 +261,13 @@ class Parser extends View
       --------------------------
       */
 
-      print_r($that->local);
-      die();
-
       $attr = $this->attributes_lookup($attr);
 
       $value->local = array_merge($attr, ['parent' => $that->local]);
+
+      print_r($attr);
+      print_r($value->local);
+      die();
 
       return $value->reduce();
       
