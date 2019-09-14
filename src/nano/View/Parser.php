@@ -99,7 +99,7 @@ class Parser extends View
         if ($op == 'if')
         {
           if (count ($attr) != 1)
-            return;
+            return $a[0];
 
           $type = reset(array_keys($attr));
 
@@ -140,7 +140,7 @@ class Parser extends View
             $arry = $that->lookup($each);
 
             if (!is_array($arry))
-              return;
+              return $a[0];
 
             $result = '';
 
@@ -199,10 +199,10 @@ class Parser extends View
           $value = $that->lookup($name);
 
           if ($value === false)
-            return;
+            return $a[0];
           
           if (!is_array($value))
-            return;
+            return $a[0];
 
           $context = array_merge($that->local, $value);
 
@@ -219,7 +219,7 @@ class Parser extends View
         else if ($op == 'view')
         {
           if (!isset($attr['src']))
-            return;
+            return $a[0];
 
           $src = $attr['src']; unset($attr['src']);
 
