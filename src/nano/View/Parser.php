@@ -33,9 +33,6 @@ class Parser extends View
 
     $this->local = $view->local;
     $that = $this;
-
-    print_r($this->local);
-    die();
     
     return preg_replace_callback(
       "~
@@ -263,6 +260,9 @@ class Parser extends View
 
       --------------------------
       */
+
+      print_r($that->local);
+      die();
 
       $attr = $this->attributes_lookup($attr);
 
