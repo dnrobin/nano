@@ -263,7 +263,10 @@ class Parser extends View
 
       $attr = $this->attributes_lookup($attr);
 
-      $value->local = array_merge($attr, ['parent' => $that->local]);
+      // remove the view instance from the next local scope
+      $context = $that->local; unset($context[$ident]);
+
+      $value->local = array_merge($attr, $context);
 
       print_r($attr);
       print_r($value->local);
