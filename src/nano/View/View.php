@@ -42,7 +42,7 @@ class View implements \ArrayAccess
   /**
    * Set global context variable
    */
-  public static function global($name, $value)
+  final public static function global($name, $value)
   {
     self::$global[$name] = $value;
   }
@@ -50,7 +50,7 @@ class View implements \ArrayAccess
   /**
    * Set local context variable
    */
-  public function set(string $name, $value)
+  final public function set(string $name, $value)
   {
     $this->local[$name] = $value;
   }
@@ -58,7 +58,7 @@ class View implements \ArrayAccess
   /**
    * Get local context variable
    */
-  public function get(string $name)
+  final public function get(string $name)
   {
     if (isset($this->local[$name]))
       return $this->local[$name];
