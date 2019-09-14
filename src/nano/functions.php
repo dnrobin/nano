@@ -8,6 +8,47 @@
  * last-update 09-2019
  */
 
+set_error_handler(function ($code, $str, $file, $line)
+{
+	switch ($code)
+	{
+		case E_USER_NOTICE: 	echo "<b>Note:</b>"; break;
+		case E_USER_WARNING: 	echo "<b>Warning:</b>"; break;
+		case E_USER_ERROR: 		echo "<b>Error:</b>"; break;
+	}
+
+	echo " $str in $file ($line)\r\n";
+
+	return true;
+}, E_USER_NOTICE | E_USER_WARNING | E_USER_ERROR);
+
+if (!function_exists('notice'))
+{
+	function notice($msg)
+	{
+		// TODO: don't output in production mode
+		user_error($msg, E_USER_NOTICE);
+	}
+}
+
+if (!function_exists('warn'))
+{
+	function warn($msg)
+	{
+		// TODO: don't output in production mode
+		user_error($msg, E_USER_WARNING);
+	}
+}
+
+if (!function_exists('error'))
+{
+	function error($msg)
+	{
+		// TODO: don't output in production mode
+		user_error($msg, E_USER_ERROR);
+	}
+}
+
 if (!function_exists('redirect'))
 {
 	function redirect($url, $statusCode = 303)
@@ -49,33 +90,6 @@ if (!function_exists('object_to_array'))
 	function object_to_array($object)
 	{
 		return json_decode(json_encode($object), true);
-	}
-}
-
-if (!function_exists('notice'))
-{
-	function notice($msg)
-	{
-		// TODO: don't output in production mode
-		user_error($msg, E_USER_NOTICE);
-	}
-}
-
-if (!function_exists('warn'))
-{
-	function warn($msg)
-	{
-		// TODO: don't output in production mode
-		user_error($msg, E_USER_WARNING);
-	}
-}
-
-if (!function_exists('error'))
-{
-	function error($msg)
-	{
-		// TODO: don't output in production mode
-		user_error($msg, E_USER_ERROR);
 	}
 }
 
