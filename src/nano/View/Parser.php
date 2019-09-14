@@ -275,7 +275,7 @@ class Parser extends View
    * @param string
    * @return mixed
    */
-  private function lookup($name)
+  protected function lookup($name)
   {
     if ($name[0] == '$') {
       $value = self::$global; // global state is accessed by prefixing name wih '$'
@@ -399,7 +399,7 @@ class Parser extends View
       if (false === $value)
         return false;
 
-      $value = $this->piped($value, $m['pipes']);
+      $value = $this->pipe($value, $m['pipes']);
 
       return $value;
   }
@@ -411,7 +411,7 @@ class Parser extends View
    * @param string $pipexpr
    * @return mixed
    */
-  private function piped($value, $pipexpr)
+  protected function pipe($value, $pipexpr)
   {
     $_pipes = [
         'inc'   => function ($value) { return ++$value; },
