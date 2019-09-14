@@ -261,7 +261,7 @@ class Parser extends View
 
       $value->local = array_merge($attr, ['parent' => $that->local]);
 
-      return $that->parse($value);
+      return $value->reduce();
       
     }, $content);
   }
