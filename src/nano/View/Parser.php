@@ -246,7 +246,7 @@ class Parser extends View
       
       if (! $value instanceof View)
       {
-        $pipe = $this->attributes(['pipe'=>0],$attr);
+        $pipe = $this->attributes(['pipe'=>''],$attr);
 
         if ($pipe)
           $value = $this->pipe($value, $pipe);
