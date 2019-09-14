@@ -164,7 +164,7 @@ class Parser extends View
           {
             list($range, $index) = $this->attributes(['range','index'=>null], $attr);
             
-            if (!preg_match('/^([\d-]+)(?:\.\.|:([\d-]+):)([\d-]+)$/', $attr['range'], $m))
+            if (!preg_match('/^([\d-]+)(?:\.\.|:([\d-]+):)([\d-]+)$/', $range, $m))
               return;
 
             $range = @range($m[1], $m[3], $m[2] ?: 1) ?: [];
@@ -239,17 +239,16 @@ class Parser extends View
       --------------------------
       */
 
-      $value = $that->lookup($a['ident']);
+      $value = $that->lookup($ident);
 
       if ($value === false)
         return $a[0];
       
       if (! $value instanceof View)
       {
-        list($pipe) = $this->attributes(['alter'=>''],$attr);
+        list($pipe) = $this->attributes(['alter'=>''], $attr);
 
-        if ($pipe)
-          $value = $this->pipe($value, $pipe);
+        $value = $this->pipe($value, $pipe);
         
         return $value;
       }
@@ -381,32 +380,6 @@ class Parser extends View
     }
 
     return $attr;
-  }
-
-  /**
-   * Process identifier
-   * 
-   * var:   \w+([\d+])*
-   * name:  var(\.var)*
-   * pipe:  \w+
-   * iden:  name ('|' pipe)*
-   * 
-   * @param string
-   * @return mixed
-   */
-  private function piped_lookup($iden)
-  {
-      if (!preg_match("/^".self::IDENT_EXPR."$/", $iden, $m))
-        return false;
-
-      $value = $this->lookup($m['name']);
-
-      if (false === $value)
-        return false;
-
-      $value = $this->pipe($value, $m['pipes']);
-
-      return $value;
   }
 
   /**
