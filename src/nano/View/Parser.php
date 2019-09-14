@@ -294,8 +294,8 @@ class Parser extends View
 
       $name = $m[1];
 
-      if (!is_array($value))
-        return false;
+      // if (!is_array($value))
+      //   return false;
       
       if (!isset($value[$name]))
         return false;
