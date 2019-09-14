@@ -437,12 +437,15 @@ class Parser extends View
 
       $pipes = explode('|', $pipexpr); unset($pipes[0]);
 
-      foreach ($pipes as $pipe)
+      if (!empty($pipes))
       {
-        if (!isset($_pipes[rtrim($pipe)]))
-          return false;
+        foreach ($pipes as $pipe)
+        {
+          if (!isset($_pipes[rtrim($pipe)]))
+            return false;
 
-        $value = $_pipes[rtrim($pipe)]($value);
+          $value = $_pipes[rtrim($pipe)]($value);
+        }
       }
 
       return $value;
