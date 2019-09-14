@@ -31,7 +31,7 @@ class Parser extends View
       }, $view->content
     );
 
-    echo "--- I AM PARSING " . get_class($view) . " with content '$view->content'\nwith context" . print_r($view->local,true);
+    // echo "--- I AM PARSING " . get_class($view) . " with content '$view->content'\nwith context" . print_r($view->local,true);
 
     $this->local = $view->local;
     $that = $this;
@@ -286,8 +286,6 @@ class Parser extends View
    */
   protected function lookup($name)
   {
-    echo "nano {{$name}}";
-
     if ($name[0] == '$') {
       $value = self::$global; // global state is accessed by prefixing name wih '$'
       $name = substr($name, 1);
@@ -327,8 +325,6 @@ class Parser extends View
       }
 
     } while (count($parts) > 0);
-
-    echo " found!\n";
 
     return $value;
   }
