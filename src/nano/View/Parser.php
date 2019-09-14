@@ -270,7 +270,6 @@ class Parser extends View
 
       $value->local = array_merge($attr, ['parent' => $parent]);
 
-      echo "calling " . get_class($value) . "->reduce() from parser\n";
       return $value->reduce();
       
     }, $content);
@@ -421,7 +420,7 @@ class Parser extends View
       foreach ($pipes as $pipe)
       {
         if (!$pipe) continue;
-        
+
         if (!isset($_pipes[trim($pipe)]))
           return false;
 
