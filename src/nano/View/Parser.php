@@ -398,35 +398,37 @@ class Parser extends View
   protected function pipe($value, $pipexpr)
   {
     $_pipes = [
-        'inc'   => function ($value) { return ++$value; },
-        'dec'   => function ($value) { return --$value; },
-        'snake' => function ($value) { return snake($value); },
-        'camel' => function ($value) { return camel($value); },
-        'kebab' => function ($value) { return kebab($value); },
-        'title' => function ($value) { return title($value); },
-        'pascal'=> function ($value) { return pascal($value); },
-        'upper' => function ($value) { return strtoupper($value); },
-        'lower' => function ($value) { return strtolower($value); },
-        'rev'   => function ($value) { return array_reverse($value); },
-        'front' => function ($value) { return array_shift($value); },
-        'back'  => function ($value) { return array_pop($value); },
-        'sum'   => function ($value) { return array_sum($value); },
-        'count' => function ($value) { return count($value); },
-      ];
+      'inc'   => function ($value) { return ++$value; },
+      'dec'   => function ($value) { return --$value; },
+      'snake' => function ($value) { return snake($value); },
+      'camel' => function ($value) { return camel($value); },
+      'kebab' => function ($value) { return kebab($value); },
+      'title' => function ($value) { return title($value); },
+      'pascal'=> function ($value) { return pascal($value); },
+      'upper' => function ($value) { return strtoupper($value); },
+      'lower' => function ($value) { return strtolower($value); },
+      'rev'   => function ($value) { return array_reverse($value); },
+      'front' => function ($value) { return array_shift($value); },
+      'back'  => function ($value) { return array_pop($value); },
+      'sum'   => function ($value) { return array_sum($value); },
+      'count' => function ($value) { return count($value); },
+    ];
 
-      $pipes = explode('|', $pipexpr);
+    $pipes = explode('|', $pipexpr);
 
-      if (!empty($pipes))
+    echo "PIPES ".print_r($pipes, true)."END";
+
+    if (!empty($pipes))
+    {
+      foreach ($pipes as $pipe)
       {
-        foreach ($pipes as $pipe)
-        {
-          if (!isset($_pipes[rtrim($pipe)]))
-            return false;
+        if (!isset($_pipes[trim($pipe)]))
+          return false;
 
-          $value = $_pipes[rtrim($pipe)]($value);
-        }
+        $value = $_pipes[trim($pipe)]($value);
       }
+    }
 
-      return $value;
+    return $value;
   }
 }
