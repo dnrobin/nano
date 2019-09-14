@@ -26,8 +26,8 @@ if (!function_exists('view'))
 {
 	function view($content, $context = [])
 	{
-		if (file_exists($content))
-			$content = file_get_contents($content);
+		if (file_exists(get_include_path() . '/' . $content))
+			$content = file_get_contents($content, true);
 
 		return new nano\View\View($content, $context);
 	}
