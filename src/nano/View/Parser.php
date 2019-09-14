@@ -31,11 +31,11 @@ class Parser extends View
       }, $view->content
     );
 
-    print_r($this->local);
-    die();
-
     $this->local = $view->local;
     $that = $this;
+
+    print_r($this->local);
+    die();
     
     return preg_replace_callback(
       "~
