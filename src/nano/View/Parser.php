@@ -248,7 +248,8 @@ class Parser extends View
       {
         list($pipe) = $this->attributes(['alter'=>''],$attr);
 
-        $value = $this->pipe($value, $pipe);
+        if ($pipe)
+          $value = $this->pipe($value, $pipe);
         
         return $value;
       }
