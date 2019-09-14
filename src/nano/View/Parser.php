@@ -334,7 +334,7 @@ class Parser extends View
       if (is_numeric($k))
       {
         if (!isset($given[$v]))
-          parse_error("missing required attribute '$v'");
+          error("missing required attribute '$v'");
 
         $attr[] = $given[$v];
         unset($given[$v]);
@@ -352,7 +352,7 @@ class Parser extends View
     }
 
     if (count($given) > 0)
-      parse_error("unknown attribute '".reset(array_keys($given))."'");
+      error("unknown attribute '".reset(array_keys($given))."'");
 
     return $attr;
   }
