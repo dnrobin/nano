@@ -286,6 +286,8 @@ class Parser extends View
    */
   protected function lookup($name)
   {
+    echo "nano {{$name}}\n";
+
     if ($name[0] == '$') {
       $value = self::$global; // global state is accessed by prefixing name wih '$'
       $name = substr($name, 1);
