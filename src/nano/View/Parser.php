@@ -31,7 +31,8 @@ class Parser extends View
       }, $view->content
     );
 
-    echo "There is no content '$view->content'\n";
+    print_r($this->local);
+    die();
 
     $this->local = $view->local;
     $that = $this;
