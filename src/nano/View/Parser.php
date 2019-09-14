@@ -246,10 +246,9 @@ class Parser extends View
       
       if (! $value instanceof View)
       {
-        list($pipe) = $this->attributes(['pipe'=>''],$attr);
+        list($pipe) = $this->attributes(['alter'=>''],$attr);
 
-        if ($pipe)
-          $value = $this->pipe($value, $pipe);
+        $value = $this->pipe($value, $pipe);
         
         return $value;
       }
@@ -435,7 +434,7 @@ class Parser extends View
         'count' => function ($value) { return count($value); },
       ];
 
-      $pipes = explode('|', $pipexpr); unset($pipes[0]);
+      $pipes = explode('|', $pipexpr);
 
       if (!empty($pipes))
       {
