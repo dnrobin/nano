@@ -16,51 +16,31 @@ namespace nano\View;
  * template syntax offers many runtime options via pipes.
  */
 
-// TODO : doc template syntax
-
 class View implements \ArrayAccess
 {
-  const INL_OPERATORS = ['@'];
-  const BLK_OPERATORS = ['#'];
-  const IDENT_EXPR    = "(?<name>\\$?\w[\w\d\.\[\]]*)(?<pipes>(?:\s*\|\s*\w+)*)";
-
   /**
-   * namespace for relative views
+   * Global context
    * 
    * @var array
    */
-  private $namespace;
+  protected static $global = [];
 
   /**
-   * Global view scope variable
+   * Local context
    * 
    * @var array
    */
-  private static $global = [];
+  protected $local;
 
   /**
-   * Local view scope variables
-   * 
-   * @var array
-   */
-  private $context;
-
-  /**
-   * Template content
+   * View template content
    * 
    * @var string
    */
-  private $content;
+  protected $content = '';
 
   /**
-   * Subviews registered by this view
-   * 
-   * @var array
-   */
-  private $views = [];
-
-  /**
-   * Set global (shared) context
+   * Set global context variable
    */
   public static function global($name, $value)
   {
@@ -68,501 +48,97 @@ class View implements \ArrayAccess
   }
 
   /**
-   * Set view content
-   * 
-   * @param string
-   * @return void
+   * Set local context variable
    */
-  public function set($content)
+  public function set(string $name, $value)
   {
-    $this->content = $content;
+    $this->local[$name] = $value;
   }
 
   /**
-   * Set view context
-   * 
-   * @param array
-   * @return void
+   * Get local context variable
    */
-  public function setContext(array $context)
+  public function get(string $name)
   {
-    $this->context = $context;
+    if (isset($this->local[$name]))
+      return $this->local[$name];
+
+    if (isset(self::$global[$name]))
+      return self::$global[$name];
+
+    return null;
   }
 
   /**
-   * Set view namespace
+   * Return rendered representation of view
    * 
-   * @param string
-   * @return void
-   */
-  public function setNamespace(string $namespace)
-  {
-    $this->namespace = $namespace;
-  }
-
-  /**
-   * Register a subview
-   * 
-   * @param string
-   * @param string
-   * @return void
-   */
-  public function register($name, $class)
-  {
-    if (\preg_match('/\[|\]|\.|\s+/', $name))
-      error("invalid name '$name' for subview in register");
-    
-    $this->views[$name] = $class;
-  }
-
-  /**
-   * Process view template code
-   * 
-   * @return string
+   * @return mixed
    */
   public function reduce()
   {
-    $inl = implode('', self::INL_OPERATORS);
-    $blk = implode('', self::BLK_OPERATORS);
+    $parser = new Parser();
 
-    $preproc = preg_replace_callback(
-      "~\{\{\s*(?:(:)|(/)?[?$blk])~",
-      function ($a) {
-        static $i = 1;
-        return $a[0] . ($a[1] ? $i - 1 : ($a[2] ? --$i : $i++)) . '%';
-      }, $this->content
-    );
-
-    return preg_replace_callback(
-      "~
-        \{\{\s*
-          (?<op>
-            [$inl]
-            |(?<b>(?<if>\?)|[$blk])
-          )?
-          (?<i>
-            (\d+\%)+
-          )?\s*
-          (?<expr>
-            (?<iden>".self::IDENT_EXPR.")
-            .*?
-          )
-        \s*\}\}
-
-        (?(b)
-          (?<body>.*?)
-          (?(if)
-            \{\{\s*:\g{i}\s*\}\}
-            (?<else>.*?)
-          )?
-          \{\{\s*/\g{op}\g{i}\s*\}\}
-        )
-      ~xsJ",
-    [$this, 'parse'], 
-    $preproc);
-  }
-
-  /**
-   * Lookup name in context using object syntax
-   * 
-   * var:  \w+([\d+])*
-   * name:  var(\.var)*
-   * 
-   * @param string
-   * @return mixed
-   */
-  public function lookup($name)
-  {
-    if ($name[0] == '$') {
-      $value = self::$global; // global state is accessed by prefixing name wih '$'
-      $name = substr($name, 1);
-    }
-    else {
-      $value = $this->context;
-    }
-
-    $parts = array_reverse(explode('.', $name));
-
-    do
-    {
-      $part = array_pop($parts);
-
-      preg_match('/^(\w+)((?:\[\d+\])*)$/', $part, $m);
-
-      $name = $m[1];
-      
-      if (!isset($value[$name]))
-        return false;
-
-      $value = $value[$name];
-
-      if (preg_match_all('/\[(\d+)\]/', $m[2], $idx))
-      {
-        foreach ($idx[1] as $i)
-        {
-          if (!isset($value[$i]))
-            return false;
-
-          $value = $value[$i];
-        }
-      }
-
-    } while (count($parts) > 0);
-
-    return $value;
-  }
-
-  /**
-   * Parse matches expressions
-   */
-  private function parse($input)
-  {
-    extract($input);
-
-    // TODO: outputing errors this way should be remove...
-    $error = "";
-
-    if ($op)
-    {
-      switch ($op)
-      {
-        /*
-        ------------------------
-
-          conditional
-
-          syntax: '?' expr
-
-        ------------------------
-        */
-
-        case '?':
-          
-          // TODO: check expression is a valid boolean expression
-          // if (!preg_match('/.../', $expr, $m)) break;
-
-          $expr = preg_replace_callback('/\w[\w\d\.\[\]]*/', function($a) {
-            
-            $value = $this->piped_lookup($a[0]);
-
-            if (false === $value)
-              return $a[0];
-            
-            if (is_string($value))
-              return '"' . $value . '"';
-
-            if (is_object($value))
-              return $a[0];
-
-            return $value;
-          }, $expr);
-
-          $result = @eval("return ($expr) ? true : false;");
-
-          if ($result) {
-            return (new View($body, $this->context, $this->namespace))->reduce();
-          }
-
-          else if ($else) {
-            return (new View($else, $this->context, $this->namespace))->reduce();
-          }
-
-          return "";
-
-         break;
-
-        /*
-        ------------------------
-
-          foreach
-
-          syntax: '#' iden (':' (name '>' )? name)?
-
-        ------------------------
-        */
-
-        case '#':
-
-          if (!preg_match(
-            "~^
-              ".self::IDENT_EXPR."
-              (?:
-                \s*:\s*
-                (?:
-                  (?<index>\w[\w\d]*)\s*>\s*
-                )?
-                (?<var>\w[\w\d]*)
-              )?
-            $~xsJ", $expr, $m)) break;
-        
-          $value = $this->piped_lookup($iden);
-
-          if ($value === false) {
-            $error = "$name not found";
-            break;
-          }
-
-          if (is_object($value))
-          {
-            if (method_exists($value, 'toArray'))
-              $value = $value->toArray();
-            else
-              $value = object_to_array($value);
-          }
-
-          if (!is_array($value)) {
-            $error = "$iden is not an array";
-            break;
-          }
-          
-          $replace = '';
-          foreach (array_values($value) as $index => $item)
-          {
-            $context = $this->context;
-
-            if (@$m['index'])
-              $context[$m['index']] = $index;
-
-            if (@$m['var'])
-              $context[$m['var']] = $item;
-            
-            $replace .= (new View($body, $context, $this->namespace))->reduce();
-          }
-
-          return $replace;
-          
-        break;
-
-        /*
-        ------------------------
-
-          include subview
-
-          syntax: '@' iden (':' iden (',' iden)* )?
-
-        ------------------------
-        */
-        case '@':
-
-            if (!preg_match(
-            "~^
-              ".self::IDENT_EXPR."
-              (?:
-                \s*:\s*
-                (?<args>
-                  \w[\w\d\.\[\]\|\s]*
-                  (?:\s*,\s*\w[\w\d\.\[\]\|\s]*)*
-                )
-              )?
-            $~xsJ", $expr, $m)) break;
-
-          if (preg_match('/\[|\]|\$/', $name)) {
-            $error = "invalid name for subview";
-            break;
-          }
-
-          $args = explode(',', $m['args']); 
-
-          $props = [];
-          if ($args[0])
-          {
-            foreach ($args as $arg)
-            {
-              $value = $this->piped_lookup(trim($arg));
-
-              if (false === $value)
-                return $input[0];
-
-              $props[] = $value;
-            }
-          }
-
-          $context = ['parent' => $this->context];
-
-          if (isset($this->views[$name]))
-          {
-            if (is_array($this->views[$name])) {
-              $class = $this->views[$name]['class'];
-              $props = array_merge(@$this->views[$name]['props'], $props);
-            }
-
-            else {
-              $class = $this->views[$name];
-            }
-
-            if (!class_exists($class))
-              error("view class '$class' does not exist");
-
-            $namespace = preg_replace('/^\/+|\/(?=\/+)|\w+$/', '', $this->namespace . '/' . str_replace('.','/',$name));
-
-            $object = new $class('', [], $namespace);
-
-            $view = ViewFactory::constructFromObject($object, $props, $context, $namespace);
-          }
-
-          else {
-            $view = ViewFactory::constructFromName(str_replace('.','/',$name), $context , $this->namespace);
-          }
-
-          $reduced = $view->reduce();
-
-          if ($pipes)
-          {
-            $reduced = $this->piped($reduced, $pipes);
-          }
-
-          return $reduced;
-
-        break;
-      }
-    }
-
-    /*
-    ------------------------
-
-      interpolation
-
-    ------------------------
-    */
-
-    else {
-
-      $value = $this->piped_lookup($iden);
-
-      if ($value !== false) {
-
-        if (is_array($value))
-          return print_r($value, true);
-
-        return $value;
-      }
-    }
-
-    // TODO: outputing errors this way should be remove...
-    if ($error)
-      return "#" . $error . ": " . $input[0];
-
-    return $input[0];
-  }
-
-  /**
-   * Process identifier
-   * 
-   * var:   \w+([\d+])*
-   * name:  var(\.var)*
-   * pipe:  \w+
-   * iden:  name ('|' pipe)*
-   * 
-   * @param string
-   * @return mixed
-   */
-  private function piped_lookup($iden)
-  {
-      if (!preg_match("/^".self::IDENT_EXPR."$/", $iden, $m))
-        return false;
-
-      $value = $this->lookup($m['name']);
-
-      if (false === $value)
-        return false;
-
-      $value = $this->piped($value, $m['pipes']);
-
-      return $value;
-  }
-
-  /**
-   * Run value through pipes
-   * 
-   * @param mixed
-   * @param string $pipexpr
-   * @return mixed
-   */
-  private function piped($value, $pipexpr)
-  {
-    $_pipes = [
-        'inc'   => function ($value) { return ++$value; },
-        'dec'   => function ($value) { return --$value; },
-        'snake' => function ($value) { return snake($value); },
-        'camel' => function ($value) { return camel($value); },
-        'kebab' => function ($value) { return kebab($value); },
-        'title' => function ($value) { return title($value); },
-        'pascal'=> function ($value) { return pascal($value); },
-        'upper' => function ($value) { return strtoupper($value); },
-        'lower' => function ($value) { return strtolower($value); },
-        'rev'   => function ($value) { return array_reverse($value); },
-        'front' => function ($value) { return array_shift($value); },
-        'back'  => function ($value) { return array_pop($value); },
-        'sum'   => function ($value) { return array_sum($value); },
-        'count' => function ($value) { return count($value); },
-      ];
-
-      $pipes = explode('|', $pipexpr); unset($pipes[0]);
-
-      foreach ($pipes as $pipe)
-      {
-        if (!isset($_pipes[trim($pipe)]))
-          return false;
-
-        $value = $_pipes[trim($pipe)]($value);
-      }
-
-      return $value;
-  }
-
-  /**
-   * Construct from constituents
-   */
-  public function __construct($content = '', $context = [], $namespace = '')
-  {
-    $this->content = $content;
-    $this->context = $context;
-    $this->namespace = $namespace;
+    return $parser->parse($this);
   }
 
   /**
    * accessors
    */
+  public function __isset($name)
+  {
+    return (isset($this->local[$name]) 
+      || isset(self::$global[$name]));
+  }
+
   public function __get($name)
   {
-    return $this->lookup($name);
+    return $this->get($name);
   }
 
   public function __set($name, $value)
   {
-    $this->context[$name] = $value;
+    $this->set($name, $value);
   }
-
+  
   public function __toString()
   {
     return $this->reduce();
   }
 
+  public function offsetExists($name)
+  {
+    return (isset($this->local[$name]) 
+      || isset(self::$global[$name]));
+  }
+
+  public function offsetGet($name)
+  {
+    return $this->get($name);
+  }
+
+  public function offsetSet($name, $value)
+  {
+    $this->set($name, $value);
+  }
+
+  public function offsetUnset($name)
+  {
+    if (isset($this->local[$name]))
+      unset($this->local[$name]);
+
+    if (isset(self::$global[$name]))
+      unset(self::$global[$name]);
+  }
+
   /**
-   * ArrayAccess
+   * Construct from constituents
    */
-  public function offsetExists ($offset)
+  public function __construct($content = '', $context = [])
   {
-    return isset($this->context[$offset]) 
-        || isset($this->global[$offset]);
-  }
+    $this->content = $content;
+    $this->local = $context;
 
-  public function offsetGet ($offset)
-  {
-    return $this->lookup($offset);
-  }
-
-  public function offsetSet ($offset, $value)
-  {
-    $this->context[$offset] = $value;
-  }
-
-  public function offsetUnset ($offset)
-  {
-    if (isset($this->context[$offset]))
-      unset($this->context[$offset]);
-
-    if (isset($this->global[$offset]))
-      unset($this->global[$offset]);
+    if (is_object($context))
+      $this->local = object_to_array($context);
   }
 }

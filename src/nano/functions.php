@@ -24,9 +24,12 @@ if (!function_exists('redirect'))
 
 if (!function_exists('view'))
 {
-	function view($name, $context = [], $namespace = '')
+	function view($content, $context = [])
 	{
-		return nano\View\ViewFactory::constructFromName($name, $context, $namespace);
+		if (file_exists($content))
+			$content = file_get_contents($content);
+
+		return new nano\View\View($content, $context);
 	}
 }
 
