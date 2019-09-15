@@ -121,6 +121,9 @@ class Parser extends View
               $value = $that->lookup($attr['empty']);
               $true = (is_null($value) || empty($value));
               break;
+
+            default:
+              return $a[0];
           }
 
           if ($true)
