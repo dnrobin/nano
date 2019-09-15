@@ -31,8 +31,6 @@ class Parser extends View
       }, $view->content
     );
 
-    // echo "--- I AM PARSING " . get_class($view) . " with content '$view->content'\nwith context" . print_r($view->local,true);
-
     $this->local = $view->local;
     $that = $this;
     
@@ -51,7 +49,7 @@ class Parser extends View
           |
           (?!$blk|else)
           (?<ident>
-            \\$?\w[\w\d.\[\]]*
+            \\$?\w[\w\d.\[\]\{\}]*
           )
         )
         \s*
@@ -286,6 +284,17 @@ class Parser extends View
    */
   protected function lookup($name)
   {
+    // preprocess for {} insertion
+    $name = preg_replace_callback('/\{(\w[\w\d.\[\]]*)\}/', function ($a)
+    {
+      $value = $this->lookup($a[1]);
+
+      if ($value !== false)
+        return $value;
+
+      return $a[0];
+    }, $name);
+
     if ($name[0] == '$') {
       $value = self::$global; // global state is accessed by prefixing name wih '$'
       $name = substr($name, 1);
