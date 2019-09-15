@@ -107,6 +107,11 @@ class Parser extends View
 
           switch ($type)
           {
+            case 'if':
+              $expr = $this->expression($attr['if']);
+              $true = @eval("return ($expr) ? true : false;");
+              break;
+
             case 'exist':
               $value = $that->lookup($attr['exist']);
               $true = ($value !== false);
@@ -384,7 +389,10 @@ class Parser extends View
    * @return array
    */
   private function attributes_lookup($attr)
-  { 
+  {
+    if (!is_array($attr))
+      $attr = [$attr];
+    
     foreach ($attr as $name => &$value)
     {
       $local = $this->lookup($value);
@@ -394,6 +402,21 @@ class Parser extends View
     }
 
     return $attr;
+  }
+
+  private function expression(string $expr)
+  {
+    $expr = preg_replace_callback('/\{?(\w[\w\d.\[\]]*)\}?/', function ($a)
+    {
+      $value = $this->lookup($a[1]);
+
+      if ($value !== false)
+        return $value;
+
+      return $a[0];
+    }, $expr);
+
+    return $expr;
   }
 
   /**
