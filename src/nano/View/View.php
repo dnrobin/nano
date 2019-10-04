@@ -346,8 +346,8 @@ implements \ArrayAccess
       'kebab' => function ($value) { return @kebab($value); },
       'snake' => function ($value) { return @snake($value); },
       'flip'  => function ($value) { return @array_reverse($value, false); },
-      'add1' => function ($value) { return (is_numeric($value) ? $value + 1 : $value); },
-      'sub1' => function ($value) { return (is_numeric($value) ? $value - 1 : $value); }
+      '++' => function ($value) { return (is_numeric($value) ? $value + 1 : $value); },
+      '--' => function ($value) { return (is_numeric($value) ? $value - 1 : $value); }
     ];
 
     preg_match_all('/\|\s*(\w+)/', $pipline, $pipes);
