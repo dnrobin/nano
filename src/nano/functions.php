@@ -65,6 +65,15 @@ if (!function_exists('redirect'))
 	}
 }
 
+if (!function_exists('is_arrayable'))
+{
+  function is_arrayable($var)
+  {
+    return is_array($var) ||
+      ($var instanceof ArrayAccess);
+  }
+}
+
 if (!function_exists('view'))
 {
 	function view($content, $context = [])
