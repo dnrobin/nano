@@ -75,6 +75,16 @@ class Json implements \ArrayAccess, \IteratorAggregate
   }
 
   /**
+   * Apply reductions to produce string output
+   * 
+   * @return string
+   */
+  public function reduce()
+  {
+    return json_encode($this->data, JSON_PRETTY_PRINT);
+  }
+
+  /**
    * Overload accessors
    */
   function __get($name)
@@ -89,7 +99,7 @@ class Json implements \ArrayAccess, \IteratorAggregate
 
   function __toString()
   {
-    return json_encode($this->data, JSON_PRETTY_PRINT);
+    return $this->reduce();
   }
 
   function toArray()
