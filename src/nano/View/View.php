@@ -143,40 +143,39 @@ implements \ArrayAccess
               catch(\ArgumentCountError $e) { return; }
             }
 
-            if (is_array($value))
+            if (is_arrayable($value))
             {
-              if(array_keys($value) !== range(0, count($value) - 1))
+              if (is_array($value))
               {
-                return (new View($body, $value, $this->parent))->reduce();
+                if(array_keys($value) !== range(0, count($value) - 1)) {
+                  return (new View($body, $value, $this->parent))->reduce();
+                }
               }
 
-              else
+              $output = '';
+
+              foreach ($value as $index => $element)
               {
-                $output = '';
+                $context = $element;
 
-                foreach ($value as $index => $element)
+                if ($match['as'])
+                  $context = [$match['as'] => $element];
+
+                $view = new View($body, $context, $this->parent);
+
+                if ($match['index'])
                 {
-                  $context = $element;
-
-                  if ($match['as'])
-                    $context = [$match['as'] => $element];
-
-                  $view = new View($body, $context, $this->parent);
-
-                  if ($match['index'])
-                  {
-                    $view->set($match['index'], $index);
-                  }
-                  else
-                  {
-                    $view->set('_', $index);
-                  }
-
-                  $output .= $view->reduce();
+                  $view->set($match['index'], $index);
+                }
+                else
+                {
+                  $view->set('_', $index);
                 }
 
-                return $output;
+                $output .= $view->reduce();
               }
+
+              return $output;
             }
 
             else if (is_object($value))
