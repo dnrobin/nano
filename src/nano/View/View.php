@@ -281,7 +281,7 @@ implements \ArrayAccess
     {
       $part = array_pop($parts);
 
-      if (!preg_match('/^([a-zA-Z_]\w*)((?:\[\d+\])+)?$/', $part, $match))
+      if (!preg_match('/^([$a-zA-Z_]\w*)((?:\[\d+\])+)?$/', $part, $match))
         return false;
 
       if (!isset($context[$match[1]]))
