@@ -131,7 +131,7 @@ implements \ArrayAccess
           else if ($op == '#')
           {
 
-            if (!preg_match('/^(?<name>[a-zA-Z_]\w*)(?:\s*:\s*(?:(?<index>[a-zA-Z_]\w*)\s*>\s*)?(?<as>[a-zA-Z_]\w*))?$/', $opexpr, $match))
+            if (!preg_match('/^(?<name>[$a-zA-Z_]\w*)(?:\s*:\s*(?:(?<index>[a-zA-Z_]\w*)\s*>\s*)?(?<as>[a-zA-Z_]\w*))?$/', $opexpr, $match))
               return '';
 
             $value = $this->eval($match['name']);
