@@ -12,6 +12,8 @@ namespace nano\View;
 
 class Json implements \ArrayAccess, \IteratorAggregate
 {
+  use Reducible;
+  
   /**
    * @var array
    */

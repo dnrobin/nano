@@ -29,6 +29,8 @@ namespace nano\View;
 class View
 implements \ArrayAccess
 {
+  use Reducible;
+  
   /**
    * @var \View|null
    */
