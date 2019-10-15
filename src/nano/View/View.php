@@ -39,12 +39,12 @@ implements \ArrayAccess
   /**
    * @var array
    */
-  private $context;
+  protected $context;
 
   /**
    * @var string
    */
-  private $content;
+  protected $content;
 
   /**
    * Set context variable
@@ -76,7 +76,7 @@ implements \ArrayAccess
    * @param 
    * @return string
    */
-  const INLOPS = ['\@'];
+  const INLOPS = ['\@'];  // TODO: this op has no implementation...
   const BLKOPS = ['\#'];
   private function parse()
   {
