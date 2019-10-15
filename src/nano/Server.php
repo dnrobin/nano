@@ -12,8 +12,7 @@ namespace nano;
 
 require_once __DIR__ . '/functions.php';
 
-// TODO: turn off errors in production
-// error_reporting(0);
+// TODO: turn off errors in production environment
 
 class Server
 {

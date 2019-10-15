@@ -14,11 +14,17 @@ namespace nano\View;
  * The view helper class is a stateful context driven template parser
  * able to reduce a hierarchy of views to a single html output. The 
  * template syntax offers much runtime control via pipes.
+ * 
+ * The syntax is as follows:
+ * 
+ * '{{' expr [ '|' pipe ]+ [ ':' [ index '>' ] var ] '}}' [ body '{{' 'end' '}}' ]
+ * 
+ * if the expression result is a single value, the body is ignored and
+ * value interpolation is performed in-place. if it is list, an arrayable
+ * object or a hash, the body is repeated N times with the element as 
+ * context. it is also possible to specify variables for the index and
+ * context directly using ': i > n' syntax. a block must be closed with '{{ end }}'.
  */
-
- // TODO Syntax:
- //   {{ expr }} [ <body> {{/}} ] 
- // | {{ expr '?' }} <if> [ {{:}} <else> ] {{/}}
 
 class View
 implements \ArrayAccess
@@ -91,8 +97,7 @@ implements \ArrayAccess
               \s*(?<opexpr>.+?)
             )
             |
-            \s*(?<expr>.+?)\s*
-            (?<pipes>(?:\|\s*[^|\s]+?)+)?
+            \s*(?<expr>.+?)
           )
         \s*\}\}
         (?(b)\s*
@@ -182,13 +187,19 @@ implements \ArrayAccess
 
         else
         {
+          // extract pipes from expression
+          preg_match_all('/\|\s*(?<pipes>[^|\s]+)\s*/', $expr, $matches);
+
+          // remove pipes from expr string
+          $expr = str_replace(join('',$matches[0]),'',$expr);
+
           $value = $this->eval($expr);
 
           if ($value instanceof View)
             $value = $value->reduce();
 
-          if ($pipes)
-            $value = $this->pipeline($value, $pipes);
+          if ($matches['pipes'])
+            $value = $this->pipeline($value, $matches['pipes']);
 
           if ($value !== false)
             return "$value";
@@ -336,31 +347,19 @@ implements \ArrayAccess
    * @param string
    * @return mixed
    */
-  private function pipeline($value, string $pipline)
+  private function pipeline($value, $pipes)
   {
-    $PIPES = [
-      'upper' => function ($value) { return @strtoupper($value); },
-      'lower' => function ($value) { return @strtolower($value); },
-      'title' => function ($value) { return @title($value); },
-      'camel' => function ($value) { return @camel($value); },
-      'kebab' => function ($value) { return @kebab($value); },
-      'snake' => function ($value) { return @snake($value); },
-      'flip'  => function ($value) { return @array_reverse($value, false); },
-      '++' => function ($value) { return (is_numeric($value) ? $value + 1 : $value); },
-      '--' => function ($value) { return (is_numeric($value) ? $value - 1 : $value); }
-    ];
+    global $_PIPES;
 
-    preg_match_all('/\|\s*(\w+)/', $pipline, $pipes);
-
-    if (empty($pipes[1]))
+    if (empty($pipes))
       return $value;
 
-    foreach ($pipes[1] as $pipe)
+    foreach ($pipes as $pipe)
     {
-      if (!isset($PIPES[$pipe]))
+      if (!isset($_PIPES[$pipe]))
         return false;
       
-      $value = $PIPES[$pipe]($value);
+      $value = $_PIPES[$pipe]($value);
     }
 
     return $value;

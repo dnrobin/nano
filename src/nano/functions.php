@@ -171,6 +171,22 @@ if (!function_exists('title'))
 	}
 }
 
+// define named pipes
+
+global $_PIPES;
+$_PIPES = [
+	'upper' => function ($value) { return @strtoupper($value); },
+	'lower' => function ($value) { return @strtolower($value); },
+	'title' => function ($value) { return @title($value); },
+	'camel' => function ($value) { return @camel($value); },
+	'kebab' => function ($value) { return @kebab($value); },
+	'snake' => function ($value) { return @snake($value); },
+	'flip'  => function ($value) { return @array_reverse($value, false); },
+	'sum'   => function ($value) { return @array_sum($value); },
+	'count' => function ($value) { return @count($value); },
+	'++' => function ($value) { return (is_numeric($value) ? $value + 1 : $value); },
+	'--' => function ($value) { return (is_numeric($value) ? $value - 1 : $value); }
+];
 
 function _tokenize($str)
 {
