@@ -130,11 +130,10 @@ implements \ArrayAccess
           // TODO: treat expr result contextually removing even this op
           else if ($op == '#')
           {
-
-            if (!preg_match('/^(?<name>[$a-zA-Z_]\w*)(?:\s*:\s*(?:(?<index>[a-zA-Z_]\w*)\s*>\s*)?(?<as>[a-zA-Z_]\w*))?$/', $opexpr, $match))
+            if (!preg_match('/^(?<name>[$a-zA-Z_].*?)(?:\s*:\s*(?:(?<index>[a-zA-Z_]\w*)\s*>\s*)?(?<as>[a-zA-Z_]\w*))?$/', $opexpr, $match))
               return '';
 
-            $value = $this->eval($match['name']);
+            $value = $this->lookup($match['name']);
 
             if (is_callable($value))
             {
