@@ -17,7 +17,7 @@ class Json implements \ArrayAccess, \IteratorAggregate
   /**
    * @var array
    */
-  private $data;
+  private $data = [];
 
   /**
    * Load from file
@@ -136,7 +136,6 @@ class Json implements \ArrayAccess, \IteratorAggregate
    * IteratorAggregate
    */
   public function getIterator() {
-    var_dump($this->data);
       return new \ArrayIterator($this->data);
   }
 
