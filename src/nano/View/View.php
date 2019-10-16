@@ -118,7 +118,7 @@ implements \ArrayAccess
               {{\?:\g{id}}}\s*
               (?<else>.*?)
             )?
-            {{/\g{id}}}
+            {{/\g{id}}}\s*
           )
       ~xs',
       function ($a)
@@ -269,7 +269,7 @@ implements \ArrayAccess
    */
   private function expr(string $expr)
   {
-    // TODO: invoke expression parser
+    // TODO: invoke expression parser!
     return $this->lookup($expr);
   }
 
