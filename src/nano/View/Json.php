@@ -27,7 +27,7 @@ class Json implements \ArrayAccess, \IteratorAggregate
     if (!file_exists($filename))
       error("json file '$filename' does not exist");
 
-    $this->set(file_get_contents($filename, true));
+    $this->set(file_get_contents($filename));
   }
 
   /**
