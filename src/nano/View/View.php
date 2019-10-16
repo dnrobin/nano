@@ -163,58 +163,63 @@ implements \ArrayAccess
           // get eval value
           $value = $this->expr($expr);
 
+          // convert view to its content
+          if ($value instanceof View)
+              $value = $value->reduce();
+
+          // get callable value
+          if (is_callable($value))
+          {
+            try {
+              $value = $value();
+            }
+            catch(\ArgumentCountError $e) { return; }
+          }
+
           // run it through pipeline
           if (!empty($pipes[1]))
               $value = $this->pipeline($value, $pipes[1]);
 
           if ($v)
           {
-            if ($value instanceof View)
-              $value = $value->reduce();
-
             if ($value !== false)
               return "$value";
           }
 
           else
           {
-            if (is_callable($value))
-            {
-              try {
-                $value = $value();
-              }
-              catch(\ArgumentCountError $e) { return; }
-            }
+            preg_match('/^(?:\s*:\s*(?:(?<index>[a-zA-Z_]\w*)\s*>\s*)?(?<as>[a-zA-Z_]\w*))?$/', $asg, $match);
+
+            $index = $match['index'];
+            $as    = $match['as'];
 
             if (is_arrayable($value))
             {
               if (is_array($value))
               {
                 if(array_keys($value) !== range(0, count($value) - 1)) {
-                  return (new View($body, $value, $this->parent))->reduce();
+                  return (new View($body, ($as ? [$as => $value] : $value), $this->parent))->reduce();
                 }
               }
 
               $output = '';
 
-              preg_match('/^(?:\s*:\s*(?:(?<index>[a-zA-Z_]\w*)\s*>\s*)?(?<as>[a-zA-Z_]\w*))?$/', $asg, $match);
-
-              foreach ($value as $index => $element)
+              foreach ($value as $key => $element)
               {
                 $context = $element;
 
-                if ($match['as'])
-                  $context = [$match['as'] => $element];
+                if ($as)
+                  $context = [$as => $element];
 
                 $view = new View($body, $context, $this->parent);
 
-                if ($match['index'])
+                if ($index)
                 {
-                  $view->set($match['index'], $index);
+                  $view->set($index, $key);
                 }
                 else
                 {
-                  $view->set('_', $index);
+                  $view->set('_', $key);
                 }
 
                 $output .= $view->reduce();
@@ -225,7 +230,7 @@ implements \ArrayAccess
 
             else if (is_object($value))
             {
-              return (new View($body, $value, $this->parent))->reduce();
+              return (new View($body, ($as ? [$as => $value] : $value), $this->parent))->reduce();
             }
           }
         }
