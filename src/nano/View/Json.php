@@ -27,7 +27,7 @@ class Json implements \ArrayAccess, \IteratorAggregate
     if (!file_exists($filename))
       error("json file '$filename' does not exist");
 
-    $this->set(file_get_contents($filename));
+    $this->set(file_get_contents($filename, true));
   }
 
   /**
@@ -40,6 +40,8 @@ class Json implements \ArrayAccess, \IteratorAggregate
 
   /**
    * Set content
+   * 
+   * @param mixed
    */
   public function set($json)
   {
@@ -134,6 +136,7 @@ class Json implements \ArrayAccess, \IteratorAggregate
    * IteratorAggregate
    */
   public function getIterator() {
+    var_dump($this->data);
       return new \ArrayIterator($this->data);
   }
 
