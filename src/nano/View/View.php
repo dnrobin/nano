@@ -15,9 +15,25 @@ namespace nano\View;
  * able to reduce a hierarchy of views to a single html output. The 
  * template syntax offers much runtime control via pipes.
  * 
- * The syntax is as follows:
+ * 1. Block interpolation syntax
  * 
- * '{{' expr [ '|' pipe ]+ [ ':' [ index '>' ] var ] '}}' [ body '{{' 'end' '}}' ]
+ * '{{' eval [ ':' [ index '>' ] var ] '}}' body '{{/}}'
+ * 
+ * 2. Conditional block
+ * 
+ * '{{' '?' expr '}}' if_body [ '{{:}}' else_body ] '{{/}}'
+ * 
+ * 3. Value interpolation syntax
+ * 
+ * '{{' eval '/}}'
+ * 
+ *  where,
+ *    eval:  expr [ '|' pipe ]*
+ *    expr:  ident | bool
+ * 
+ * 4. View file inclusion syntax
+ * 
+ * '{{' ':' file '/}}'
  * 
  * if the expression result is a single value, the body is ignored and
  * value interpolation is performed in-place. if it is list, an arrayable
@@ -76,41 +92,35 @@ implements \ArrayAccess
    * @param 
    * @return string
    */
-  const INLOPS = ['\@'];  // TODO: this op has no implementation...
-  const BLKOPS = ['\#'];
   private function parse()
   {
-    $inlOps = implode('|', static::INLOPS);
-    $blkOps = implode('|', static::BLKOPS);
+    $content = preg_replace_callback('/{{\s*(?:(\?:)|(\/)|(?=.+?(\/)?\s*}}))?/', function ($a) {
+      static $i = 0;
 
-    // preprocess identify block scopes
-    $content = preg_replace_callback("/\{\{\s*(\/)?($blkOps|(\?:)|\?)/", function ($a)
-    {
-      static $i = 0; return $a[0] . ($a[3] ? $i - 1 : ($a[1] ? --$i : $i++)) . ';';
+      if ($a[3])
+        return $a[0];
+
+      return $a[0] . ($a[1] ? $i : ( $a[2] ? $i-- : ++$i )) . ';';
     }, $this->content);
 
     return preg_replace_callback(
-      "~
-        \{\{\s*
-          (?:
-            (?:
-              (?<op>$inlOps|(?<b>$blkOps|(?<i>\?)))
-              (?<id>(\d+;)+)
-              \s*(?<opexpr>.+?)
-            )
-            |
-            \s*(?<expr>.+?)
+      '~
+          {{\s*
+            (?<op>:|(?<i>\?))?
+            (?<id>(\d+;)*)
+            \s*(?<eval>.+?)
+            \s*(?<asg>:\s*([a-zA-Z_]\w*\s*>\s*)?[a-zA-Z_]\w*)?
+          \s*(?<v>/\s*)?}}
+
+          (?(v)|\s*
+            (?<body>.*?)
+            (?(i)
+              {{\?:\g{id}}}\s*
+              (?<else>.*?)
+            )?
+            {{/\g{id}}}
           )
-        \s*\}\}
-        (?(b)\s*
-          (?<body>.*?)
-          (?(i)
-            \{\{\s*\?:\g{id}\s*\}\}
-            (?<else>.*?)
-          )?
-          \{\{\s*/\g{op}\g{id}\s*\}\}
-        )
-      ~sxJ",
+      ~xs',
       function ($a)
       {
         extract ($a);
@@ -119,7 +129,7 @@ implements \ArrayAccess
         {
           if ($op == '?')
           {
-            $result = $this->eval($opexpr);
+            $result = $this->expr($arg);
 
             if ($result)
               return (new View($body, $this->context, $this->parent))->reduce();
@@ -127,14 +137,47 @@ implements \ArrayAccess
               return (new View($else, $this->context, $this->parent))->reduce();  
           }
 
-          // TODO: treat expr result contextually removing even this op
-          else if ($op == '#')
+          else if ($op == ':')
           {
-            if (!preg_match('/^(?<name>[$a-zA-Z_].*?)(?:\s*:\s*(?:(?<index>[a-zA-Z_]\w*)\s*>\s*)?(?<as>[a-zA-Z_]\w*))?$/', $opexpr, $match))
-              return '';
+            preg_match('/^(\'|\")(.+?)\g(1)$/', $expr, $file);
 
-            $value = $this->lookup($match['name']);
+            if ($file[2])
+            {
+              $filename = get_include_path() . '/' . $file[2];
+              if (file_exists($filename))
+              {
+                return (new View(file_get_contents($filename), $this->context, $this->parent))->reduce();
+              }
+            }
+          }
+        }
 
+        else
+        {
+          // extract pipes from eval
+          preg_match_all('/\|\s*([^|\s]+)\s*/', $eval, $pipes);
+
+          // extract expr from eval
+          $expr = str_replace(join('',$pipes[0]),'',$eval);
+
+          // get eval value
+          $value = $this->expr($expr);
+
+          // run it through pipeline
+          if (!empty($pipes[1]))
+              $value = $this->pipeline($value, $pipes[1]);
+
+          if ($v)
+          {
+            if ($value instanceof View)
+              $value = $value->reduce();
+
+            if ($value !== false)
+              return "$value";
+          }
+
+          else
+          {
             if (is_callable($value))
             {
               try {
@@ -153,6 +196,8 @@ implements \ArrayAccess
               }
 
               $output = '';
+
+              preg_match('/^(?:\s*:\s*(?:(?<index>[a-zA-Z_]\w*)\s*>\s*)?(?<as>[a-zA-Z_]\w*))?$/', $asg, $match);
 
               foreach ($value as $index => $element)
               {
@@ -184,28 +229,7 @@ implements \ArrayAccess
             }
           }
         }
-
-        else
-        {
-          // extract pipes from expression
-          preg_match_all('/\|\s*(?<pipes>[^|\s]+)\s*/', $expr, $matches);
-
-          // remove pipes from expr string
-          $expr = str_replace(join('',$matches[0]),'',$expr);
-
-          $value = $this->eval($expr);
-
-          if ($value instanceof View)
-            $value = $value->reduce();
-
-          if ($matches['pipes'])
-            $value = $this->pipeline($value, $matches['pipes']);
-
-          if ($value !== false)
-            return "$value";
-        }
-      }
-    , $content);
+      }, $content);
   }
 
   /**
@@ -236,7 +260,7 @@ implements \ArrayAccess
    * @param string
    * @return mixed
    */
-  private function eval(string $expr)
+  private function expr(string $expr)
   {
     // TODO: invoke expression parser
     return $this->lookup($expr);
