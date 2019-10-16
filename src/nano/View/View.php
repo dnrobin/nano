@@ -195,12 +195,12 @@ implements \ArrayAccess
 
             if (is_arrayable($value))
             {
-              if (is_array($value))
-              {
-                if(array_keys($value) !== range(0, count($value) - 1)) {
-                  return (new View($body, ($as ? [$as => $value] : $value), $this->parent))->reduce();
-                }
-              }
+              // if (is_array($value))
+              // {
+              //   if(array_keys($value) !== range(0, count($value) - 1)) {
+              //     return (new View($body, ($as ? [$as => $value] : $value), $this->parent))->reduce();
+              //   }
+              // }
 
               $output = '';
 
