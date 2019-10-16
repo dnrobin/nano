@@ -36,7 +36,7 @@ class RouteStrategy
   {
     $result = ($this->closure)(...($this->arguments));
 
-    if (in_array('nano\View\Reducible', class_uses($result)))
+    if (is_object($result) && in_array('nano\View\Reducible', class_uses($result)))
     {
       return $result->reduce();
     }
