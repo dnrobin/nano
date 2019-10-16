@@ -16,10 +16,13 @@ namespace nano\Http;
 class Response
 {
   const CONTENT_TYPES = [
+    "application/x-www-form-urlencoded",
     "application/json",
     "application/xml",
+    "multipart/form-data",
     "text/html",
-    "text/xml"
+    "text/xml",
+    "text/plain",
   ];
 
   /**
