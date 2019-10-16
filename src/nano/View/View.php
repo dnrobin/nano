@@ -94,7 +94,7 @@ implements \ArrayAccess
    */
   private function parse()
   {
-    $content = preg_replace_callback('/{{\s*(?:(\?:)|(\/)|(?=.+?(\/)?\s*}}))?/', function ($a) {
+    $content = preg_replace_callback('/{{\s*(?:(\?:)|\?|(\/)|(?=.+?(\/)?\s*}}))?/', function ($a) {
       static $i = 0;
 
       if ($a[3])
@@ -118,7 +118,7 @@ implements \ArrayAccess
               {{\?:\g{id}}}\s*
               (?<else>.*?)
             )?
-            {{/\g{id}}}\s*
+            {{/\g{id}}}\s?
           )
       ~xs',
       function ($a)
@@ -129,7 +129,7 @@ implements \ArrayAccess
         {
           if ($op == '?')
           {
-            $result = $this->expr($arg);
+            $result = $this->expr($eval);
 
             if ($result)
               return (new View($body, $this->context, $this->parent))->reduce();
@@ -146,7 +146,7 @@ implements \ArrayAccess
               $filename = get_include_path() . '/' . $file[2];
               if (file_exists($filename))
               {
-                return (new View(file_get_contents($filename), $this->context, $this->parent))->reduce();
+                return (new View(file_get_contents($filename), $this->context, $this))->reduce();
               }
             }
           }
@@ -158,7 +158,7 @@ implements \ArrayAccess
           preg_match_all('/\|\s*([^|\s]+)\s*/', $eval, $pipes);
 
           // extract expr from eval
-          $expr = str_replace(join('',$pipes[0]),'',$eval);
+          $expr = trim(str_replace(join('',$pipes[0]),'',$eval));
 
           // get eval value
           $value = $this->expr($expr);
@@ -200,7 +200,7 @@ implements \ArrayAccess
                 // Note: one exception can cause a bug, if a hash has a numeric key in the last 
                 //  position with the value count() - 1, this won't evaluate to true
                 if(count($value) - 1 !== array_pop(array_keys($value))) {
-                  return (new View($body, ($as ? [$as => $value] : $value), $this->parent))->reduce();
+                  return (new View($body, ($as ? [$as => $value] : $value), $this))->reduce();
                 }
               }
 
@@ -213,7 +213,7 @@ implements \ArrayAccess
                 if ($as)
                   $context = [$as => $element];
 
-                $view = new View($body, $context, $this->parent);
+                $view = new View($body, $context, $this);
 
                 if ($index)
                 {
@@ -232,7 +232,7 @@ implements \ArrayAccess
 
             else if (is_object($value))
             {
-              return (new View($body, ($as ? [$as => $value] : $value), $this->parent))->reduce();
+              return (new View($body, ($as ? [$as => $value] : $value), $this))->reduce();
             }
           }
         }
@@ -247,7 +247,27 @@ implements \ArrayAccess
    */
   public function lookup(string $name)
   {
-    $value = $this->resolve(trim($name));
+    // preprocess for nested [] and identify matching pairs
+    $name = preg_replace_callback('/(\[)|\]/', function ($a) {
+      static $i = 0; return $a[0] . ($a[1] ? $i++ : --$i) . ';';
+    }, $name);
+
+    // resolve all [] to a numeric constant
+    $name = preg_replace_callback('/\[((?:\d+;)+)(.*?)\]\g{1}/', function ($a)
+    {
+      $value = $a[2];
+
+      if (!is_numeric($value))
+        $value = $this->lookup($value);
+
+      if ($value === false)
+        $value = $a[2];
+
+      return "[{$value}]";
+    }, $name);
+
+    // resolve the full identifier
+    $value = $this->resolve($name);
 
     if ($value !== false)
       return $value;
@@ -255,7 +275,7 @@ implements \ArrayAccess
     if (!is_null($this->parent))
     {
       // visite all parent scopes up to global
-      return $this->parent->lookup(trim($name));
+      return $this->parent->lookup($name);
     }
 
     return false;
@@ -283,23 +303,6 @@ implements \ArrayAccess
   {
     if (!$context)
       $context = $this->context;
-
-    // preprocess for nested [] and identify matching pairs
-    $name = preg_replace_callback('/(\[)|\]/', function ($a)
-    {
-      static $i = 0; return $a[0] . ($a[1] ? $i++ : --$i) . ';';
-    }, $name);
-
-    // resolve all [] to a numeric constant
-    $name = preg_replace_callback('/\[((?:\d+;)+)(.*?)\]\g{1}/', function ($a)
-    {
-      $value = $a[2];
-
-      if (!is_numeric($value))
-        $value = $this->resolve($value);
-
-      return "[{$value}]";
-    }, $name);
     
     // resolve constant mame expression. all dynamic 
     // values have been resolved at this point.
