@@ -195,12 +195,14 @@ implements \ArrayAccess
 
             if (is_arrayable($value))
             {
-              // if (is_array($value))
-              // {
-              //   if(array_keys($value) !== range(0, count($value) - 1)) {
-              //     return (new View($body, ($as ? [$as => $value] : $value), $this->parent))->reduce();
-              //   }
-              // }
+              if (is_array($value))
+              {
+                // Note: one exception can cause a bug, if a hash has a numeric key in the last 
+                //  position with the value count() - 1, this won't evaluate to true
+                if(count($value) - 1 !== array_pop(array_keys($value))) {
+                  return (new View($body, ($as ? [$as => $value] : $value), $this->parent))->reduce();
+                }
+              }
 
               $output = '';
 
