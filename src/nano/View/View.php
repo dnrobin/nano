@@ -275,7 +275,6 @@ implements \ArrayAccess
     if (!is_null($this->parent))
     {
       // visite all parent scopes up to global
-      die('looking up in parent!');
       return $this->parent->lookup($name);
     }
 
