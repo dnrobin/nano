@@ -52,7 +52,10 @@ implements \ArrayAccess
    */
   private $parent;
 
-  function getParent() { return $this->parent; }
+  function getParent() {
+    echo "getting parent";
+    return $this->parent;
+  }
 
   /**
    * @var array
