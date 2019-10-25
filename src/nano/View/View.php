@@ -54,6 +54,9 @@ implements \ArrayAccess
 
   function getParent() {
     echo "getting parent";
+    if (!$this->parent)
+      return null;
+      
     return $this->parent;
   }
 
