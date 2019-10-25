@@ -39,6 +39,14 @@ class Json implements \ArrayAccess, \IteratorAggregate
   }
 
   /**
+   * Clear data
+   */
+  public function clear()
+  {
+    $this->data = [];
+  }
+
+  /**
    * Set content
    * 
    * @param mixed
@@ -89,22 +97,22 @@ class Json implements \ArrayAccess, \IteratorAggregate
   /**
    * Overload accessors
    */
-  function __get($name)
+  public function __get($name)
   {
     return $this->get($name);
   }
 
-  function __set($name, $value)
+  public function __set($name, $value)
   {
     $this->data[$name] = $value;
   }
 
-  function __toString()
+  public function __toString()
   {
     return $this->reduce();
   }
 
-  function toArray()
+  public function toArray()
   {
     return $this->data;
   }
@@ -142,7 +150,7 @@ class Json implements \ArrayAccess, \IteratorAggregate
   /**
    * Construct from arbitrary
    */
-  function __construct($json = null)
+  public function __construct($json = null)
   {
     if ($json)
       $this->set($json);

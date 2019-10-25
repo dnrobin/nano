@@ -50,7 +50,7 @@ implements \ArrayAccess
   /**
    * @var \View|null
    */
-  private $parent;
+  protected $parent;
 
   /**
    * @var array
