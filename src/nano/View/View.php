@@ -409,6 +409,7 @@ implements \ArrayAccess
    */
   public function __construct($content = '', $context = [], View $parent = null)
   {
+    echo "creating View '".get_class($this)."' with parent $parent\n";
     $this->content = $content;
     $this->parent = $parent;
     $this->context = [];
