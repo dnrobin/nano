@@ -20,7 +20,7 @@
   "minimum-stability": "stable",
   "autoload": {
     "psr-4": {"nano\\": "./src"},
-    "files": ["src/nano/functions.php"]
+    "files": ["src/functions.php"]
   },
   "require": {
     "php": "^7.1.3"
