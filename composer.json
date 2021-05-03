@@ -1,31 +1,28 @@
 {
-  "name": "nano/nano",
-  "description": "nano api framework",
+  "name": "robin/nano",
+  "description": "nano api server",
   "keywords": [
-    "framework",
+    "server",
     "api"
   ],
-  "license": "GPL3",
-  "support": {
-    "issues": "https://github.com/danrobin113/nano/issues",
-    "source": "https://github.com/danrobin113/nano"
-  },
+  "type": "library",
+  "license": "MIT",
   "authors": [
     {
       "name": "Daniel Robin",
       "email": "daniel.robin.1@ulaval.ca"
     }
   ],
+  "support": {
+    "issues": "https://github.com/dnrobin/nano/issues",
+    "source": "https://github.com/dnrobin/nano"
+  },
+  "minimum-stability": "stable",
+  "autoload": {
+    "psr-4": {"nano\\": "./src"},
+    "files": ["src/nano/functions.php"]
+  },
   "require": {
     "php": "^7.1.3"
-  },
-  "require-dev": {},
-  "autoload": {
-    "psr-4": {
-      "nano\\": "./src/nano/"
-    },
-    "files": [
-      "src/nano/functions.php"
-    ]
   }
 }

@@ -2,7 +2,7 @@
 /**
  * nano - a tiny server api framework
  * 
- * @author    Daniel Robin <danrobin113@github.com>
+ * @author    Daniel Robin <dnrobin@github.com>
  * @version   1.4
  * 
  * last-update 09-2019
