@@ -1,5 +1,5 @@
 {
-  "name": "robin/nano",
+  "name": "nrobin/nano",
   "description": "nano api server",
   "keywords": [
     "server",
@@ -14,8 +14,7 @@
     }
   ],
   "support": {
-    "issues": "https://github.com/dnrobin/nano/issues",
-    "source": "https://github.com/dnrobin/nano"
+    "issues": "https://github.com/dnrobin/nano/issues"
   },
   "minimum-stability": "stable",
   "autoload": {
