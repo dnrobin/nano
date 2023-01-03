@@ -12,7 +12,7 @@ $api = new nano\Server();
 # serve text from root
 $api->get('/', function () {
     echo "Hello, World!";
-})
+});
 
 $api->run();
 ```
