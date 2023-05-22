@@ -22,6 +22,11 @@
     "files": ["src/functions.php"]
   },
   "require": {
-    "php": "^7.1.3"
+    "php": "^8.0.0",
+    "psr/http-message": "^2.0"
+  },
+  "require-dev": {
+    "guzzlehttp/psr7": "^2.5",
+    "psr/http-factory": "^1.0"
   }
 }
